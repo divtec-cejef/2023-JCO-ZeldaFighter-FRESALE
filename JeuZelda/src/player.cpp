@@ -1,16 +1,23 @@
 #include "player.h"
+#include "gamecanvas.h"
 #include "resources.h"
 #include "utilities.h"
 #include "gamecore.h"
 #include "gamescene.h"
+#include "gamescene.h"
+#include "gamecanvas.h"
+#include "resources.h"
+#include "utilities.h"
+#include "sprite.h"
+#include "projectile.h"
 
 Player::Player(): Sprite(GameFramework::imagesPath() + "JeuZelda/DownLink_1.gif")
 {
+    setDebugModeEnabled(true);
 }
 
 void Player::initializeHearts() {
     // Création des sprites de la vie du joueur (coeur).
-
     for(int i = 0; i < 3; i++) {
         addHeart();
     }
@@ -21,6 +28,10 @@ void Player::tick(int elapsedMs) {
         m_invincibleCooldown -= elapsedMs;
     else
         setOpacity(1.0);  // Rétablir l'opacité normale
+
+    if(m_pSword != nullptr) {
+        m_pSword->tick(elapsedMs);
+    }
 }
 
 void Player::damage() {
@@ -34,7 +45,6 @@ void Player::damage() {
     m_pHearts.remove(m_pHearts.length() - 1);
 
     if(m_pHearts.length() < 1)
-        //dies
         return;
 }
 
@@ -49,6 +59,21 @@ void Player::addHeart() {
     heart->setData(GameCore::SpriteDataKey::SPRITE_TYPE_KEY, GameCore::HEART);
     int coeurX = 60 + m_pHearts.length() * (coeurWidth + ESPACE_ENTRE_COEURS);
     parentScene->addSpriteToScene(heart, coeurX, 20);
+}
+
+void Player::attack(QPointF direction) {
+    if(m_pSword != nullptr)
+        return;
+    m_pSword = new Projectile(SWORD_VITESSE, direction, GameFramework::imagesPath() + "JeuZelda/ZeldaSpriteSword.png", this);
+    m_pSword->setScale(SWORD_SCALE_FACTOR);
+    m_pSword->setPos(scenePos());
+    parentScene()->addSpriteToScene(m_pSword);
+}
+
+void Player::removeSword() {
+    parentScene()->removeSpriteFromScene(m_pSword);
+    delete m_pSword;
+    m_pSword = nullptr;
 }
 
 Player::~Player() {

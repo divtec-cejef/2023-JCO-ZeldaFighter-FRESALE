@@ -17,6 +17,7 @@ class GameScene;
 class Sprite;
 class Player;
 class EnnemiLeever;
+class QGraphicsItem;
 
 //! \brief Classe qui gère la logique du jeu.
 //!
@@ -30,7 +31,8 @@ public:
         DECOR,
         WATER,
         HEART,
-        ENNEMI
+        ENNEMI,
+        SWORD
     };
 
     enum SpriteDataKey {
@@ -48,7 +50,8 @@ public:
     void mouseButtonReleased(QPointF mousePosition, Qt::MouseButtons buttons);
 
     void tick(long long elapsedTimeInMilliseconds);
-    void movePlayer();
+    void updatePlayer();
+    void ThrowSword();
     void restorePlayerOpacity();
 
     static constexpr int SCENE_WIDTH = 1280;
@@ -61,6 +64,7 @@ signals:
     void notifyMouseButtonReleased(QPointF mousePosition, Qt::MouseButtons buttons);
     void notifyKeyPressed(int key);
     void notifyKeyReleased(int key);
+
 
 private:
 
@@ -77,11 +81,18 @@ private:
     bool isRightKeyPressed = false;
     bool isUpKeyPressed = false;
     bool isDownKeyPressed = false;
-    bool isEnterKeyPressed = false;
+    bool isWKeyPressed = false;
+    bool isAKeyPressed = false;
+    bool isSKeyPressed = false;
+    bool isDKeyPressed = false;
     bool hasWAnimationPlayed = false;
     bool hasAAnimationPlayed = false;
     bool hasSAnimationPlayed = false;
     bool hasDAnimationPlayed = false;
+    QGraphicsItem* m_pDisplayedInformation = nullptr;
+
+    void displayInformation(const QString& rMessage);
+
 
 private slots:
 

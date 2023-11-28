@@ -23,6 +23,7 @@ SOURCES += main.cpp\
     mainfrm.cpp \
     gamescene.cpp \
     player.cpp \
+    projectile.cpp \
     sprite.cpp \
     gamecore.cpp \
     resources.cpp \
@@ -35,6 +36,7 @@ HEADERS  += mainfrm.h \
     EnnemiLeever.h \
     gamescene.h \
     player.h \
+    projectile.h \
     sprite.h \
     gamecore.h \
     resources.h \
