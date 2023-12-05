@@ -1,25 +1,25 @@
-#include "EnnemiLeever.h"
+#include "EnnemiLeeverRouge.h"
 #include "resources.h"
 #include "utilities.h"
 #include "gamecore.h"
 #include "gamescene.h"
 #include <cstdlib>
 
-EnnemiLeever::EnnemiLeever(): Ennemy(GameFramework::imagesPath() + "JeuZelda/Ennemi1_1.gif")
+EnnemiLeeverRouge::EnnemiLeeverRouge(): Ennemy(GameFramework::imagesPath() + "JeuZelda/Ennemi2_1.gif")
 {
     // Animation de l'ennemi
-    addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Ennemi1_1.gif");
-    addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/ennemi1_2.gif");
+    addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Ennemi2_1.gif");
+    addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/ennemi2_2.gif");
     startAnimation(100);
-    setScale(LEEVER_SCALE_FACTOR);
-    m_Hp = 1;
+    setScale(LEEVER_ROUGE_SCALE_FACTOR);
+    m_Hp = 2;
 }
 
-EnnemiLeever::~EnnemiLeever() {
+EnnemiLeeverRouge::~EnnemiLeeverRouge() {
 
 }
 
-void EnnemiLeever::tick(long long elapsedTimeInMilliseconds) {
+void EnnemiLeeverRouge::tick(long long elapsedTimeInMilliseconds) {
     // Définis une constante pour la fréquence de mouvement souhaitée (une chance sur 3 chaque seconde)
     const int movementFrequency = 3000;  // en millisecondes (1000 ms = 1 seconde)
 
@@ -41,33 +41,44 @@ void EnnemiLeever::tick(long long elapsedTimeInMilliseconds) {
         switch (randomDirection) {
         case 0:
             // Déplace vers le haut
-            if (y() - LEEVER_RANGE >= 0) {
-                setY(y() - LEEVER_RANGE);
+            if (y() - LEEVER_ROUGE_RANGE >= 0) {
+                setY(y() - LEEVER_ROUGE_RANGE);
             }
             break;
         case 1:
             // Déplace vers le bas
-            if (y() + LEEVER_RANGE <= parentScene()->height() - height()) {
-                setY(y() + LEEVER_RANGE);
+            if (y() + LEEVER_ROUGE_RANGE <= parentScene()->height() - height()) {
+                setY(y() + LEEVER_ROUGE_RANGE);
             }
             break;
         case 2:
             // Déplace vers la gauche
-            if (x() - LEEVER_RANGE >= 0) {
-                setX(x() - LEEVER_RANGE);
+            if (x() - LEEVER_ROUGE_RANGE >= 0) {
+                setX(x() - LEEVER_ROUGE_RANGE);
             }
             break;
         case 3:
             // Déplace vers la droite
-            if (x() + LEEVER_RANGE <= parentScene()->width() - width()) {
-                setX(x() + LEEVER_RANGE);
+            if (x() + LEEVER_ROUGE_RANGE <= parentScene()->width() - width()) {
+                setX(x() + LEEVER_ROUGE_RANGE);
             }
             break;
         }
     }
 }
 
-void EnnemiLeever::CreateCloudOndeath(QPointF pos) {
+void EnnemiLeeverRouge::damage() {
+    m_Hp--;
+    if(m_Hp <= 0) {
+        // L'ennemi est mort, on le supprime.
+        parentScene()->removeSpriteFromScene(this);
+        CreateCloudOndeath(pos());
+        ChanceToSpawnHearth(pos());
+        deleteLater();
+    }
+}
+
+void EnnemiLeeverRouge::CreateCloudOndeath(QPointF pos) {
     Sprite* pCloud = new Sprite();
     // Ajoute les images du nuage.
     for(int index = 1; index <= 7; index++) {
@@ -87,7 +98,7 @@ void EnnemiLeever::CreateCloudOndeath(QPointF pos) {
     pCloud->startAnimation();
 }
 
-void EnnemiLeever::ChanceToSpawnHearth(QPointF pos) {
+void EnnemiLeeverRouge::ChanceToSpawnHearth(QPointF pos) {
     // quand l'ennemi meurt, il y a une chance sur X qu'il drop un coeur
     int randomChance = std::rand() % 2;
     if (randomChance == 0) {
@@ -103,11 +114,3 @@ void EnnemiLeever::ChanceToSpawnHearth(QPointF pos) {
     }
 }
 
-void EnnemiLeever::damage() {
-    m_Hp--;
-    if(m_Hp <= 0) {
-        CreateCloudOndeath(pos());
-        ChanceToSpawnHearth(pos());
-        parentScene()->removeSpriteFromScene(this);
-    }
-}

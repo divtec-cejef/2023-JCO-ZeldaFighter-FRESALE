@@ -4,15 +4,22 @@
 #include "sprite.h"
 #include <QtCore>
 #include <QObject>
+#include "ennemy.h"
 
-class EnnemiLeever : public Sprite
+class EnnemiLeever : public Ennemy
 {
 public:
     EnnemiLeever();
-    void tick(long long elapsedTimeInMilliseconds);
+    ~EnnemiLeever() override;
+    void tick(long long elapsedTimeInMilliseconds) override;
+    void damage();
+    void CreateCloudOndeath(QPointF pos);
+    void ChanceToSpawnHearth(QPointF pos);
 
 private:
     static constexpr float LEEVER_SCALE_FACTOR = 4;
+    static constexpr int LEEVER_RANGE = 80;
+    int m_Hp = 1;
 };
 
 
