@@ -8,6 +8,8 @@ class Projectile : public Sprite
 public:
     Projectile(qreal speed, QPointF direction, const QString& rImagePath, Sprite* pOwner, QGraphicsItem* pParent = nullptr);
     void tick(long long elapsedTimeMs);
+    void CreateCloudOndeath(QPointF pos);
+    int m_nbreEnnemiDeath = 0;
 
 private:
     qreal m_speed;

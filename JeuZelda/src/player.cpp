@@ -13,12 +13,12 @@
 
 Player::Player(): Sprite(GameFramework::imagesPath() + "JeuZelda/DownLink_1.gif")
 {
-    setDebugModeEnabled(true);
+    //setDebugModeEnabled(true);
 }
 
 void Player::initializeHearts() {
     // Création des sprites de la vie du joueur (coeur).
-    for(int i = 0; i < 3; i++) {
+    for(int i = 0; i < NOMBRES_COEURS; i++) {
         addHeart();
     }
 }
@@ -49,16 +49,16 @@ void Player::damage() {
 }
 
 void Player::addHeart() {
-    QPixmap CoeurImage = QPixmap(GameFramework::imagesPath() + "JeuZelda/Coeur.png");
-    int coeurWidth = CoeurImage.width() + 1;
+    QPixmap HearthImage = QPixmap(GameFramework::imagesPath() + "JeuZelda/Coeur.png");
+    int hearthWidth = HearthImage.width() + 1;
 
-    auto heart = new Sprite(CoeurImage);
+    auto heart = new Sprite(HearthImage);
     m_pHearts.append(heart);
     GameScene* parentScene = this->parentScene();
     heart->setScale(GameCore::DECOR_SCALE_FACTOR);
     heart->setData(GameCore::SpriteDataKey::SPRITE_TYPE_KEY, GameCore::HEART);
-    int coeurX = 60 + m_pHearts.length() * (coeurWidth + ESPACE_ENTRE_COEURS);
-    parentScene->addSpriteToScene(heart, coeurX, 20);
+    int hearthX = 60 + m_pHearts.length() * (hearthWidth + ESPACE_ENTRE_COEURS);
+    parentScene->addSpriteToScene(heart, hearthX, 20);
 }
 
 void Player::attack(QPointF direction) {

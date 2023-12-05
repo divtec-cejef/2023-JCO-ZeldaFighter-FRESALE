@@ -20,10 +20,11 @@ public:
     void attack(QPointF direction);
     void removeSword();
 
-    static constexpr qreal SWORD_SCALE_FACTOR = 4.0;
-    static constexpr qreal SWORD_VITESSE = 300.0;
+    static constexpr float SWORD_SCALE_FACTOR = 4.0;
+    static constexpr float SWORD_VITESSE = 550.0;
 private:
     static constexpr int ESPACE_ENTRE_COEURS = 55;
+    static constexpr int NOMBRES_COEURS = 3;
 
     QList<Sprite*> m_pHearts = {};
 

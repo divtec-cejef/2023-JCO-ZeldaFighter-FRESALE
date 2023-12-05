@@ -17,7 +17,9 @@ class GameScene;
 class Sprite;
 class Player;
 class EnnemiLeever;
+class EnnemiFactory;
 class QGraphicsItem;
+class Projectile;
 
 //! \brief Classe qui gère la logique du jeu.
 //!
@@ -32,7 +34,8 @@ public:
         WATER,
         HEART,
         ENNEMI,
-        SWORD
+        SWORD,
+        HEARTDROP
     };
 
     enum SpriteDataKey {
@@ -54,6 +57,11 @@ public:
     void ThrowSword();
     void restorePlayerOpacity();
 
+    int countEnnemies();
+    void generateEnemyWave();
+
+    void displayInformation(const QString& rMessage);
+
     static constexpr int SCENE_WIDTH = 1280;
     static constexpr float PLAYER_SCALE_FACTOR = 4;
     static constexpr float DECOR_SCALE_FACTOR = 5;
@@ -72,11 +80,13 @@ private:
     GameScene* m_pScene = nullptr;
     Player*  m_pPlayer = nullptr;
     EnnemiLeever* m_pEnnemiLeever;
+    EnnemiFactory* m_pEnnemifactory;
     Sprite* m_pBush1 = nullptr;
     Sprite* m_pBush2 = nullptr;
     Sprite* m_pRock1 = nullptr;
     Sprite* m_pRock2 = nullptr;
     int m_playerSpeed = 10;
+    int m_currentWave = 0;
     bool isLeftKeyPressed = false;
     bool isRightKeyPressed = false;
     bool isUpKeyPressed = false;
@@ -90,9 +100,7 @@ private:
     bool hasSAnimationPlayed = false;
     bool hasDAnimationPlayed = false;
     QGraphicsItem* m_pDisplayedInformation = nullptr;
-
-    void displayInformation(const QString& rMessage);
-
+    QList<int> m_pressedKeys;
 
 private slots:
 

@@ -6,6 +6,7 @@
 #include "utilities.h"
 #include "sprite.h"
 #include "gamescene.h"
+#include "ennemy.h"
 #include <math.h>
 
 Projectile::Projectile(qreal speed, QPointF direction, const QString &rImagePath, Sprite* pOwner, QGraphicsItem* pParent) : Sprite(rImagePath, pParent)
@@ -15,7 +16,7 @@ Projectile::Projectile(qreal speed, QPointF direction, const QString &rImagePath
     m_pOwner = pOwner;
     // Permet d'identifier le projectile comme étant une épée (SWORD).
     setData(GameCore::SPRITE_TYPE_KEY, GameCore::SWORD);
-    setDebugModeEnabled(true);
+    // setDebugModeEnabled(true);
     // Permet de centrer l'image du projectile.
     setOffset(sceneBoundingRect().width() / -2.0, sceneBoundingRect().height() / -2.0);
     // Permet de faire tourner l'image du projectile dans la bonne direction.
@@ -28,8 +29,27 @@ void Projectile::tick(long long elapsedTimeMs) {
         top() > parentScene()->height() ||
         right() < 0 ||
         left() > parentScene()->width()) {
+        // Le projectile est sorti de la scène, on le supprime.
         if(Player* player = dynamic_cast<Player*>(m_pOwner)) {
             player->removeSword();
+        }
+    }
+
+    QList<Sprite*> collisions = parentScene()->collidingSprites(this);
+    if(!collisions.isEmpty()) {
+        Sprite* pCollisionned = collisions.at(0);
+        if(pCollisionned->data(GameCore::SPRITE_TYPE_KEY) == GameCore::ENNEMI) {
+            // Le projectile a touché un ennemi, on utilise la fonction dame de l'ennemi
+            Ennemy* pEnnemy = dynamic_cast<Ennemy*>(pCollisionned);
+            pEnnemy->damage();
+            if(Player* player = dynamic_cast<Player*>(m_pOwner)) {
+                player->removeSword();
+            }
+        } else if(pCollisionned->data(GameCore::SPRITE_TYPE_KEY) == GameCore::DECOR) {
+            // Le projectile a touché un décor, on supprime le projectile.
+            if(Player* player = dynamic_cast<Player*>(m_pOwner)) {
+                player->removeSword();
+            }
         }
     }
 }

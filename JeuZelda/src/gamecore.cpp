@@ -19,6 +19,7 @@
 #include "sprite.h"
 #include "player.h"
 #include "EnnemiLeever.h"
+#include "ennemifactory.h"
 
 //! Initialise le contrôleur de jeu.
 //! \param pGameCanvas  GameCanvas pour lequel cet objet travaille.
@@ -42,12 +43,9 @@ GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent)
     m_pScene->addSpriteToScene(m_pPlayer);
     m_pPlayer->initializeHearts();
 
-
-    // Nouvelle ennemi
-    m_pEnnemiLeever = new EnnemiLeever();
-    m_pScene->addSpriteToScene(m_pEnnemiLeever);
-    m_pEnnemiLeever->setData(SPRITE_TYPE_KEY, ENNEMI);
-    m_pEnnemiLeever->setPos(500, 500);
+    // Création des ennemis grâce à la classe EnnemiFactory
+    // EnnemiFactory* ennemifactoy = new EnnemiFactory(m_pScene);
+    // ennemifactoy->createVague(4,2);
 
     // Création des décors
     Sprite* pBush1 = new Sprite(GameFramework::imagesPath() + "JeuZelda/Bush.png");
@@ -56,7 +54,6 @@ GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent)
     pBush1->setScale(DECOR_SCALE_FACTOR);
     pBush1->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
     m_pBush1 = pBush1;
-
 
     Sprite* pBush2 = new Sprite(GameFramework::imagesPath() + "JeuZelda/Bush.png");
     m_pScene->addSpriteToScene(pBush2);
@@ -116,32 +113,32 @@ void GameCore::keyPressed(int key) {
         m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/LeftLink_2.gif");
         m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/LeftLink_1.gif");
         m_pPlayer->startAnimation(100);
+        m_pressedKeys.prepend(key);
         break;
     case Qt::Key_Right:
         isRightKeyPressed = true;
         m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/RightLink_2.gif");
         m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/RightLink_1.gif");
         m_pPlayer->startAnimation(100);
+        m_pressedKeys.prepend(key);
         break;
     case Qt::Key_Up:
         isUpKeyPressed = true;
         m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/UpLink_2.gif");
         m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/UpLink_1.gif");
         m_pPlayer->startAnimation(100);
+        m_pressedKeys.prepend(key);
         break;
     case Qt::Key_Down:
         isDownKeyPressed = true;
         m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/DownLink_2.gif");
         m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/DownLink_1.gif");
         m_pPlayer->startAnimation(100);
+        m_pressedKeys.prepend(key);
         break;
     case Qt::Key_W:
         isWKeyPressed = true;
         if(!hasWAnimationPlayed) {
-           /*
-            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/UpLink_1.gif");
-            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/UpLinkSword.png");
-            m_pPlayer->startAnimation(100);*/
             m_playerSpeed = 0;
             hasWAnimationPlayed = true;
         }
@@ -149,10 +146,7 @@ void GameCore::keyPressed(int key) {
 
     case Qt::Key_A:
         isAKeyPressed = true;
-        if(!hasAAnimationPlayed) {/*
-            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/LeftLink_1.gif");
-            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/LeftLinkSword.png");
-            m_pPlayer->startAnimation(100);*/
+        if(!hasAAnimationPlayed) {
             m_playerSpeed = 0;
             hasAAnimationPlayed = true;
         }
@@ -160,10 +154,7 @@ void GameCore::keyPressed(int key) {
 
     case Qt::Key_S:
         isSKeyPressed = true;
-        if(!hasSAnimationPlayed) {/*
-            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/DownLink_1.gif");
-            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/DownLinkSword.png");
-            m_pPlayer->startAnimation(100);*/
+        if(!hasSAnimationPlayed) {
             m_playerSpeed = 0;
             hasSAnimationPlayed = true;
         }
@@ -171,10 +162,7 @@ void GameCore::keyPressed(int key) {
 
     case Qt::Key_D:
         isDKeyPressed = true;
-        if(!hasDAnimationPlayed) {/*
-            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/RightLink_1.gif");
-            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/RightLinkSword.png");
-            m_pPlayer->startAnimation(100);*/
+        if(!hasDAnimationPlayed) {
             m_playerSpeed = 0;
             hasDAnimationPlayed = true;
         }
@@ -195,21 +183,25 @@ void GameCore::keyReleased(int key) {
         isLeftKeyPressed = false;
         m_pPlayer->stopAnimation();
         m_pPlayer->clearAnimations();
+        m_pressedKeys.removeAll(key);
         break;
     case Qt::Key_Right:
         isRightKeyPressed = false;
         m_pPlayer->stopAnimation();
         m_pPlayer->clearAnimations();
+        m_pressedKeys.removeAll(key);
         break;
     case Qt::Key_Up:
         isUpKeyPressed = false;
         m_pPlayer->stopAnimation();
         m_pPlayer->clearAnimations();
+        m_pressedKeys.removeAll(key);
         break;
     case Qt::Key_Down:
         isDownKeyPressed = false;
         m_pPlayer->stopAnimation();
         m_pPlayer->clearAnimations();
+        m_pressedKeys.removeAll(key);
         break;
     case Qt::Key_W:
         isWKeyPressed = false;
@@ -243,7 +235,17 @@ void GameCore::keyReleased(int key) {
 
 void GameCore::tick(long long elapsedTimeInMilliseconds) {
     m_pPlayer->tick(static_cast<int>(elapsedTimeInMilliseconds));
-    m_pEnnemiLeever->tick(static_cast<int>(elapsedTimeInMilliseconds));
+
+    auto children = m_pScene->items();
+
+    for(auto child: children) {
+        if (Ennemy* ennemi = dynamic_cast<Ennemy*>(child)) {
+            ennemi->tick(elapsedTimeInMilliseconds);
+        }
+    }
+
+    countEnnemies();
+    generateEnemyWave();
     updatePlayer();
 
     QList<Sprite*> collisions = m_pScene->collidingSprites(m_pPlayer);
@@ -283,14 +285,8 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
         } else if (pCollisionned->data(SPRITE_TYPE_KEY).toInt() == WATER) {
             isInWater = true;
         } else if (pCollisionned->data(SPRITE_TYPE_KEY).toInt() == ENNEMI) {
-            // Si la touche W est presée et qua la colision haute du joueur touche l'ennemi
-            if (isWKeyPressed && m_pPlayer->y() < pCollisionned->y()) {
-                // L'ennemi prend des dégâts
-                displayInformation("test");
-            } else {
-                // Le joueur prend des dégâts
-                m_pPlayer->damage();
-            }
+            // Le joueur prend des dégâts
+            m_pPlayer->damage();
         }
     }
 
@@ -301,6 +297,49 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
         } else {
             m_playerSpeed = 10;
         }
+    }
+}
+
+int GameCore::countEnnemies() {
+    int nbreEnnemi = 0;
+    auto children = m_pScene->items();
+
+    for(auto child: children) {
+        if (Ennemy* ennemi = dynamic_cast<Ennemy*>(child)) {
+            nbreEnnemi++;
+        }
+    }
+    return nbreEnnemi;
+}
+
+void GameCore::generateEnemyWave() {
+    // Vérifier s'il y a déjà des ennemis sur la scène
+    if (countEnnemies() == 0) {
+        // Créer une nouvelle vague d'ennemis
+        EnnemiFactory* ennemiFactory = new EnnemiFactory(m_pScene);
+
+        int nbreEnnemiLeever = 0;
+        int nbreEnnemiLeeverRouge = 0;
+
+        switch (m_currentWave) {
+        case 1:
+            nbreEnnemiLeever = 2;
+            break;
+        case 2:
+            nbreEnnemiLeever = 3;
+            nbreEnnemiLeeverRouge = 1;
+            break;
+        case 3:
+            nbreEnnemiLeever = 0;
+            nbreEnnemiLeeverRouge = 3;
+            break;
+        }
+
+        ennemiFactory->createVague(nbreEnnemiLeever, nbreEnnemiLeeverRouge);
+
+        // Incrémenter le numéro de vague actuel
+        m_currentWave++;
+        delete ennemiFactory;
     }
 }
 
@@ -318,17 +357,20 @@ void GameCore::displayInformation(const QString& rMessage) {
 
 void GameCore::updatePlayer() {
     // Déplacer le personnage en fonction de l'état des touches
-    if (isLeftKeyPressed) {
-        m_pPlayer->setX(m_pPlayer->x() - m_playerSpeed);
-    }
-    if (isRightKeyPressed) {
-        m_pPlayer->setX(m_pPlayer->x() + m_playerSpeed);
-    }
-    if (isUpKeyPressed) {
-        m_pPlayer->setY(m_pPlayer->y() - m_playerSpeed);
-    }
-    if (isDownKeyPressed) {
-        m_pPlayer->setY(m_pPlayer->y() + m_playerSpeed);
+    if(!m_pressedKeys.isEmpty()) {
+        int mostRecentKey = m_pressedKeys.first();
+        if (mostRecentKey == Qt::Key_Left && m_pPlayer->x() - m_playerSpeed >= 0) {
+            m_pPlayer->setX(m_pPlayer->x() - m_playerSpeed);
+        }
+        if (mostRecentKey == Qt::Key_Right && m_pPlayer->x() + m_playerSpeed <= m_pScene->width() - m_pPlayer->sceneBoundingRect().width()) {
+            m_pPlayer->setX(m_pPlayer->x() + m_playerSpeed);
+        }
+        if (mostRecentKey == Qt::Key_Up && m_pPlayer->y() - m_playerSpeed >= 0) {
+            m_pPlayer->setY(m_pPlayer->y() - m_playerSpeed);
+        }
+        if (mostRecentKey == Qt::Key_Down && m_pPlayer->y() + m_playerSpeed <= m_pScene->height() - m_pPlayer->sceneBoundingRect().height()) {
+            m_pPlayer->setY(m_pPlayer->y() + m_playerSpeed);
+        }
     }
     if(isWKeyPressed) {
         m_pPlayer->attack(QPointF(0, -1));

@@ -13,8 +13,8 @@
 //#define DEBUG_SHAPE
 // décommenter pour afficher dans la sortie de debug le nombre de sprites existants
 #define DEBUG_SPRITE_COUNT
-//#define DEBUG_BRECT
-//#define DEBUG_SHAPE
+// #define DEBUG_BRECT
+// #define DEBUG_SHAPE
 
 #include <QGraphicsPixmapItem>
 #include <QObject>

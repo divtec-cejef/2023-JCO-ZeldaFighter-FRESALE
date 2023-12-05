@@ -20,6 +20,9 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     EnnemiLeever.cpp \
+    EnnemiLeeverRouge.cpp \
+    ennemifactory.cpp \
+    ennemy.cpp \
     mainfrm.cpp \
     gamescene.cpp \
     player.cpp \
@@ -34,6 +37,9 @@ SOURCES += main.cpp\
 
 HEADERS  += mainfrm.h \
     EnnemiLeever.h \
+    EnnemiLeeverRouge.h \
+    ennemifactory.h \
+    ennemy.h \
     gamescene.h \
     player.h \
     projectile.h \
