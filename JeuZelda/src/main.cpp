@@ -205,7 +205,7 @@ int main(int argc, char *argv[])
     }
 
     MainFrm w;
-    w.show();
+    w.showFullScreen();
 
     // Pour un mode d'affichage fenêtré, plein écran
     // w.showMaximized();

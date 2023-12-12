@@ -35,71 +35,35 @@ void EnnemiLeever::tick(long long elapsedTimeInMilliseconds) {
         timeCounter = 0;
 
         // Génére un nombre aléatoire entre 0 et 2 inclus
-        int randomDirection = std::rand() % 4;
+        int randomDirection = QRandomGenerator::global()->bounded(0, 4);
 
         // En fonction du nombre aléatoire, déplace l'ennemi dans une direction spécifique
         switch (randomDirection) {
         case 0:
             // Déplace vers le haut
             if (y() - LEEVER_RANGE >= 0) {
-                setY(y() - LEEVER_RANGE);
+                moveBy(0, -LEEVER_RANGE);
             }
             break;
         case 1:
             // Déplace vers le bas
             if (y() + LEEVER_RANGE <= parentScene()->height() - height()) {
-                setY(y() + LEEVER_RANGE);
+                moveBy(0, LEEVER_RANGE);
             }
             break;
         case 2:
             // Déplace vers la gauche
             if (x() - LEEVER_RANGE >= 0) {
-                setX(x() - LEEVER_RANGE);
+                moveBy(-LEEVER_RANGE, 0);
             }
             break;
         case 3:
             // Déplace vers la droite
             if (x() + LEEVER_RANGE <= parentScene()->width() - width()) {
-                setX(x() + LEEVER_RANGE);
+                moveBy(LEEVER_RANGE, 0);
             }
             break;
         }
-    }
-}
-
-void EnnemiLeever::CreateCloudOndeath(QPointF pos) {
-    Sprite* pCloud = new Sprite();
-    // Ajoute les images du nuage.
-    for(int index = 1; index <= 7; index++) {
-        pCloud->addAnimationFrame(GameFramework::imagesPath() +
-                                  QString("JeuZelda/Cloud%1.png").arg(index));
-    }
-    qDebug() << "Cloud created";
-    pCloud->setAnimationSpeed(25);
-    pCloud->setScale(5);
-    pCloud->setPos(pos);
-    pCloud->setEmitSignalEndOfAnimationEnabled(true);
-    connect(pCloud, &Sprite::animationFinished, pCloud, &Sprite::deleteLater);
-
-    // Ajoute le nuage à la scène et démarre son animation.
-    parentScene()->addSpriteToScene(pCloud);
-    qDebug() << "Cloud added to scene";
-    pCloud->startAnimation();
-}
-
-void EnnemiLeever::ChanceToSpawnHearth(QPointF pos) {
-    // quand l'ennemi meurt, il y a une chance sur X qu'il drop un coeur
-    int randomChance = std::rand() % 2;
-    if (randomChance == 0) {
-        Sprite* pHeart = new Sprite(GameFramework::imagesPath() + "JeuZelda/HearthOnGround1.gif");
-        pHeart->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/HearthOnGround1.gif");
-        pHeart->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/HearthOnGround2.gif");
-        pHeart->setData(GameCore::SPRITE_TYPE_KEY, GameCore::HEARTDROP);
-        pHeart->setScale(4);
-        pHeart->setPos(pos);
-        parentScene()->addSpriteToScene(pHeart);
-        pHeart->startAnimation(100);
-        qDebug() << "Heart added to scene";
     }
 }
 
@@ -107,7 +71,7 @@ void EnnemiLeever::damage() {
     m_Hp--;
     if(m_Hp <= 0) {
         CreateCloudOndeath(pos());
-        ChanceToSpawnHearth(pos());
-        parentScene()->removeSpriteFromScene(this);
+        ChanceToSpawnItems(pos(), 9, 18);
+        removeEnnemyFromScene();
     }
 }

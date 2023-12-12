@@ -11,6 +11,7 @@
 #include <QDebug>
 #include <QSettings>
 #include <QMovie>
+#include <QFontDatabase>
 
 #include "gamescene.h"
 #include "gamecanvas.h"
@@ -20,6 +21,8 @@
 #include "player.h"
 #include "EnnemiLeever.h"
 #include "ennemifactory.h"
+#include "ennemileeverrouge.h"
+#include "ennemioctopus.h"
 
 //! Initialise le contrôleur de jeu.
 //! \param pGameCanvas  GameCanvas pour lequel cet objet travaille.
@@ -45,12 +48,12 @@ GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent)
 
     // Création des ennemis grâce à la classe EnnemiFactory
     // EnnemiFactory* ennemifactoy = new EnnemiFactory(m_pScene);
-    // ennemifactoy->createVague(4,2);
+    // ennemifactoy->createVague(4,2,3);
 
     // Création des décors
     Sprite* pBush1 = new Sprite(GameFramework::imagesPath() + "JeuZelda/Bush.png");
     m_pScene->addSpriteToScene(pBush1);
-    pBush1->setPos(100, 200);
+    pBush1->setPos(200, 200);
     pBush1->setScale(DECOR_SCALE_FACTOR);
     pBush1->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
     m_pBush1 = pBush1;
@@ -67,7 +70,7 @@ GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent)
     pRock1->setPos(1000, 200);
     pRock1->setScale(DECOR_SCALE_FACTOR);
     pRock1->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
-    m_pBush1 = pRock1;
+    m_pRock1 = pRock1;
 
     // Création du point d'eau
     //QPixmap brickImage = QPixmap(GameFramework::imagesPath() + "JeuZelda/Water.png");
@@ -110,31 +113,27 @@ void GameCore::keyPressed(int key) {
     switch (key) {
     case Qt::Key_Left:
         isLeftKeyPressed = true;
-        m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/LeftLink_2.gif");
-        m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/LeftLink_1.gif");
-        m_pPlayer->startAnimation(100);
-        m_pressedKeys.prepend(key);
+        if (!m_pressedKeys.contains(key)) {
+            m_pressedKeys.prepend(key);
+        }
         break;
     case Qt::Key_Right:
         isRightKeyPressed = true;
-        m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/RightLink_2.gif");
-        m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/RightLink_1.gif");
-        m_pPlayer->startAnimation(100);
-        m_pressedKeys.prepend(key);
+        if(!m_pressedKeys.contains(key)) {
+            m_pressedKeys.prepend(key);
+        }
         break;
     case Qt::Key_Up:
         isUpKeyPressed = true;
-        m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/UpLink_2.gif");
-        m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/UpLink_1.gif");
-        m_pPlayer->startAnimation(100);
-        m_pressedKeys.prepend(key);
+        if(!m_pressedKeys.contains(key)) {
+            m_pressedKeys.prepend(key);
+        }
         break;
     case Qt::Key_Down:
         isDownKeyPressed = true;
-        m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/DownLink_2.gif");
-        m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/DownLink_1.gif");
-        m_pPlayer->startAnimation(100);
-        m_pressedKeys.prepend(key);
+        if(!m_pressedKeys.contains(key)) {
+            m_pressedKeys.prepend(key);
+        }
         break;
     case Qt::Key_W:
         isWKeyPressed = true;
@@ -177,29 +176,42 @@ void GameCore::keyPressed(int key) {
 //! Traite le relâchement d'une touche.
 //! \param key Numéro de la touche (voir les constantes Qt)
 void GameCore::keyReleased(int key) {
+    if(key == Qt::Key_Space) {
+        switch (m_gameMode) {
+        case RUNNING:
+            if (m_pGameCanvas->isTicking()) {
+                m_pGameCanvas->stopTick();
+                displayInformation("Press space to continue");
+            } else {
+                clearInformation();
+                m_pGameCanvas->startTick();
+            }
+            break;
+        case PAUSE:
+            m_gameMode = RUNNING;
+            clearInformation();
+            break;
+        }
+    }
     // Réinitialiser l'état de la touche correspondante
     switch (key) {
     case Qt::Key_Left:
         isLeftKeyPressed = false;
-        m_pPlayer->stopAnimation();
         m_pPlayer->clearAnimations();
         m_pressedKeys.removeAll(key);
         break;
     case Qt::Key_Right:
         isRightKeyPressed = false;
-        m_pPlayer->stopAnimation();
         m_pPlayer->clearAnimations();
         m_pressedKeys.removeAll(key);
         break;
     case Qt::Key_Up:
         isUpKeyPressed = false;
-        m_pPlayer->stopAnimation();
         m_pPlayer->clearAnimations();
         m_pressedKeys.removeAll(key);
         break;
     case Qt::Key_Down:
         isDownKeyPressed = false;
-        m_pPlayer->stopAnimation();
         m_pPlayer->clearAnimations();
         m_pressedKeys.removeAll(key);
         break;
@@ -244,6 +256,10 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
         }
     }
 
+    if(m_pPlayer->m_pHearts.length() == 1) {
+        m_pPlayer->blinkRed();
+    }
+
     countEnnemies();
     generateEnemyWave();
     updatePlayer();
@@ -268,7 +284,7 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
             int xOverlap = std::min(playerX + m_pPlayer->width(), collisionX + collisionWidth) - std::max(playerX, collisionX);
             int yOverlap = std::min(playerY + m_pPlayer->height(), collisionY + collisionHeight) - std::max(playerY, collisionY);
 
-            // Adjust player position based on collision direction
+            // Ajuster la position du joueur en fonction de la direction de la collision
             if (xOverlap < yOverlap) {
                 if (playerX < collisionX) {
                     m_pPlayer->setX(m_pPlayer->x() - m_playerSpeed);
@@ -287,6 +303,26 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
         } else if (pCollisionned->data(SPRITE_TYPE_KEY).toInt() == ENNEMI) {
             // Le joueur prend des dégâts
             m_pPlayer->damage();
+            if(m_pPlayer->isDead) {
+                m_gameMode = ENDED_LOSE;
+                displayInformation("Game Over !");
+                qDebug() << "Le joueur est mort";
+            }
+        } else if (pCollisionned->data(SPRITE_TYPE_KEY).toInt() == HEARTDROP) {
+            // Ajoute un coeur au joueur si il en a moin de 6
+            if(m_pPlayer->m_pHearts.length() < MAX_HEARTH) {
+                m_pPlayer->addHeart();
+            }
+            // supprime le coeur de la scène une fois que le joueur l'a touchée
+            m_pScene->removeSpriteFromScene(pCollisionned);
+            delete pCollisionned;
+        } else if(pCollisionned->data(SPRITE_TYPE_KEY).toInt() == BLUE_RING) {
+            // Le joueur devient invincible pendant 5 secondes, iol clignote au bout de 3 secondes
+            m_pPlayer->m_invincibleCooldown = 5000;
+            m_pPlayer->setOpacity(0.5);
+            // supprime le blue ring de la scène une fois que le joueur l'a touchée
+            m_pScene->removeSpriteFromScene(pCollisionned);
+            delete pCollisionned;
         }
     }
 
@@ -312,6 +348,9 @@ int GameCore::countEnnemies() {
     return nbreEnnemi;
 }
 
+//! Génère une nouvelle vague d'ennemis si la scène est vide.
+//! La vague est composée d'un nombre d'ennemis égal au numéro de la vague actuelle.
+//! Le numéro de la vague actuelle est incrémenté à chaque fois.
 void GameCore::generateEnemyWave() {
     // Vérifier s'il y a déjà des ennemis sur la scène
     if (countEnnemies() == 0) {
@@ -320,39 +359,101 @@ void GameCore::generateEnemyWave() {
 
         int nbreEnnemiLeever = 0;
         int nbreEnnemiLeeverRouge = 0;
+        int nbreEnnemiOctopus = 0;
 
-        switch (m_currentWave) {
-        case 1:
-            nbreEnnemiLeever = 2;
-            break;
-        case 2:
-            nbreEnnemiLeever = 3;
-            nbreEnnemiLeeverRouge = 1;
-            break;
-        case 3:
-            nbreEnnemiLeever = 0;
-            nbreEnnemiLeeverRouge = 3;
-            break;
+        for(int i = 0; i < m_currentWave; i++) {
+            // Générer un nombre aléatoire entre 0 et 5 inclus
+            int random = QRandomGenerator::global()->bounded(0, 5);
+            // Si le nombre est 0, créer un ennemi Leever Rouge
+            if (random == 0 && m_currentWave > 2) {
+                nbreEnnemiLeeverRouge++;
+                // Si le nombre est 1, créer un ennemi Octopus
+            } else if(random == 1 && m_currentWave > 5) {
+                nbreEnnemiOctopus++;
+            } else {
+                // Sinon créer un ennemi Leever
+                nbreEnnemiLeever++;
+            }
         }
+        ennemiFactory->createWave(nbreEnnemiLeever, nbreEnnemiLeeverRouge, nbreEnnemiOctopus);
 
-        ennemiFactory->createVague(nbreEnnemiLeever, nbreEnnemiLeeverRouge);
-
+        // Afficher le numéro de la vague
+        displayWaves(m_currentWave);
         // Incrémenter le numéro de vague actuel
         m_currentWave++;
         delete ennemiFactory;
     }
 }
 
+//! Si un message est déjà affiché, il est remplacé par ce nouveau message.
+//! \param rMessage Message à afficher.
 void GameCore::displayInformation(const QString& rMessage) {
-    // Affichage du message en gras.
-    QGraphicsSimpleTextItem* pText = m_pScene->createText(QPointF(0,0), rMessage, 50, Qt::red);
-    QFont boldFont = pText->font();
-    boldFont.setBold(true);
-    pText->setFont(boldFont);
+    clearInformation();
 
-    // Centrage du texte
-    pText->setPos((m_pScene->width() - pText->boundingRect().width()) / 2, m_pScene->height() / 2);
+    // Charger la police personnalisée (police du jeu de base Zelda (NES))
+    int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
+    QString policeZelda = QFontDatabase::applicationFontFamilies(id).at(0);
+
+    // Créer la police
+    QFont customFont(policeZelda);
+
+    // Agrandit le texte
+    customFont.setPointSize(25);
+
+    // Créer l'élément texte avec la police personnalisée
+    QGraphicsSimpleTextItem* pText = m_pScene->createText(QPointF(0,0), rMessage, 50, Qt::red);
+    pText->setFont(customFont);
+
+    // Centrer le texte
+    pText->setPos((m_pScene->width() - pText->boundingRect().width()) / 2,
+                  m_pScene->height()/2);
+
     m_pDisplayedInformation = pText;
+}
+
+void GameCore::displayWaves(int waveNumber) {
+    // Construire le message avec le numéro de la vague
+    QString message = "Vague " + QString::number(waveNumber);
+
+    // Charger la police personnalisée (police du jeu de base Zelda (NES))
+    int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
+    QString policeZelda = QFontDatabase::applicationFontFamilies(id).at(0);
+
+    // Créer la police personnalisée
+    QFont customFont(policeZelda);
+
+    // Vérifier si le texte existe déjà, sinon le créer
+    if (!m_pDisplayedNbreVagues) {
+        // Affichage du message en gras avec la police personnalisée.
+        m_pDisplayedNbreVagues = m_pScene->createText(QPointF(0, 0), message, 50, Qt::red);
+
+        // Agrandit le texte
+        customFont.setPointSize(30);
+
+        // Place le texte en haut à droite de l'écran
+        m_pDisplayedNbreVagues->setX(m_pScene->width() - m_pDisplayedNbreVagues->boundingRect().width() - 80);
+
+        // Applique la police mise à jour
+        m_pDisplayedNbreVagues->setFont(customFont);
+    } else {
+        // Mettre à jour le texte existant avec la nouvelle police
+        m_pDisplayedNbreVagues->setText(message);
+
+        // Agrandit le texte
+        customFont.setPointSize(30);
+
+        // Applique la police mise à jour
+        m_pDisplayedNbreVagues->setFont(customFont);
+    }
+}
+
+//! Efface le message affiché.
+//! Si aucun message n'est affiché, cette fonction ne fait rien.
+void GameCore::clearInformation() {
+    if (m_pDisplayedInformation != nullptr) {
+        delete m_pDisplayedInformation;
+        m_pDisplayedInformation = nullptr;
+    }
 }
 
 void GameCore::updatePlayer() {
@@ -360,15 +461,23 @@ void GameCore::updatePlayer() {
     if(!m_pressedKeys.isEmpty()) {
         int mostRecentKey = m_pressedKeys.first();
         if (mostRecentKey == Qt::Key_Left && m_pPlayer->x() - m_playerSpeed >= 0) {
+            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/LeftLink_2.gif");
+            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/LeftLink_1.gif");
             m_pPlayer->setX(m_pPlayer->x() - m_playerSpeed);
         }
         if (mostRecentKey == Qt::Key_Right && m_pPlayer->x() + m_playerSpeed <= m_pScene->width() - m_pPlayer->sceneBoundingRect().width()) {
+            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/RightLink_2.gif");
+            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/RightLink_1.gif");
             m_pPlayer->setX(m_pPlayer->x() + m_playerSpeed);
         }
         if (mostRecentKey == Qt::Key_Up && m_pPlayer->y() - m_playerSpeed >= 0) {
+            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/UpLink_2.gif");
+            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/UpLink_1.gif");
             m_pPlayer->setY(m_pPlayer->y() - m_playerSpeed);
         }
         if (mostRecentKey == Qt::Key_Down && m_pPlayer->y() + m_playerSpeed <= m_pScene->height() - m_pPlayer->sceneBoundingRect().height()) {
+            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/DownLink_2.gif");
+            m_pPlayer->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/DownLink_1.gif");
             m_pPlayer->setY(m_pPlayer->y() + m_playerSpeed);
         }
     }

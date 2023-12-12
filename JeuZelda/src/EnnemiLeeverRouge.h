@@ -13,8 +13,6 @@ public:
     ~EnnemiLeeverRouge() override;
     void tick(long long elapsedTimeInMilliseconds) override;
     void damage();
-    void CreateCloudOndeath(QPointF pos);
-    void ChanceToSpawnHearth(QPointF pos);
 
 private:
     static constexpr float LEEVER_ROUGE_SCALE_FACTOR = 5.2;

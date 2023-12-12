@@ -20,6 +20,7 @@ class EnnemiLeever;
 class EnnemiFactory;
 class QGraphicsItem;
 class Projectile;
+class QGraphicsSimpleTextItem;
 
 //! \brief Classe qui gère la logique du jeu.
 //!
@@ -31,11 +32,19 @@ class GameCore : public QObject
 public:
     enum SpriteType {
         DECOR,
+        PLAYER,
         WATER,
         HEART,
         ENNEMI,
-        SWORD,
-        HEARTDROP
+        PROJECTIL,
+        HEARTDROP,
+        BLUE_RING
+    };
+
+    enum GameMode {
+        RUNNING,
+        PAUSE,
+        ENDED_LOSE
     };
 
     enum SpriteDataKey {
@@ -58,13 +67,20 @@ public:
     void restorePlayerOpacity();
 
     int countEnnemies();
+    void playerPosition();
     void generateEnemyWave();
 
     void displayInformation(const QString& rMessage);
+    void displayWaves(int waveNumber);
+    void clearInformation();
+
+    GameMode m_gameMode = RUNNING;
 
     static constexpr int SCENE_WIDTH = 1280;
     static constexpr float PLAYER_SCALE_FACTOR = 4;
     static constexpr float DECOR_SCALE_FACTOR = 5;
+    static constexpr float HEARTH_DROP_SCALE_FACTOR = 3.8;
+    static constexpr int MAX_HEARTH = 5;
 
 signals:
     void notifyMouseMoved(QPointF newMousePosition);
@@ -99,7 +115,8 @@ private:
     bool hasAAnimationPlayed = false;
     bool hasSAnimationPlayed = false;
     bool hasDAnimationPlayed = false;
-    QGraphicsItem* m_pDisplayedInformation = nullptr;
+    QGraphicsSimpleTextItem* m_pDisplayedInformation;
+    QGraphicsSimpleTextItem* m_pDisplayedNbreVagues;
     QList<int> m_pressedKeys;
 
 private slots:

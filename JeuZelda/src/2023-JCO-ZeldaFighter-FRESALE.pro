@@ -22,6 +22,7 @@ SOURCES += main.cpp\
     EnnemiLeever.cpp \
     EnnemiLeeverRouge.cpp \
     ennemifactory.cpp \
+    ennemioctopus.cpp \
     ennemy.cpp \
     mainfrm.cpp \
     gamescene.cpp \
@@ -39,6 +40,7 @@ HEADERS  += mainfrm.h \
     EnnemiLeever.h \
     EnnemiLeeverRouge.h \
     ennemifactory.h \
+    ennemioctopus.h \
     ennemy.h \
     gamescene.h \
     player.h \

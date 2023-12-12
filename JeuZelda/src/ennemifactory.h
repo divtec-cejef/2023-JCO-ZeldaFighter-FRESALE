@@ -7,7 +7,7 @@ class EnnemiFactory
 {
 public:
     EnnemiFactory(GameScene* scene);
-    void createVague(int nbreEnnemiLeever, int nbreEnnemiLeeverRouge);
+    void createWave(int nbreEnnemiLeever, int nbreEnnemiLeeverRouge, int nbreEnnemiOctopus);
 
     GameScene* m_pScene = nullptr;
 };

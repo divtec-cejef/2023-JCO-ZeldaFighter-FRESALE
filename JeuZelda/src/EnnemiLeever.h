@@ -13,8 +13,6 @@ public:
     ~EnnemiLeever() override;
     void tick(long long elapsedTimeInMilliseconds) override;
     void damage();
-    void CreateCloudOndeath(QPointF pos);
-    void ChanceToSpawnHearth(QPointF pos);
 
 private:
     static constexpr float LEEVER_SCALE_FACTOR = 4;

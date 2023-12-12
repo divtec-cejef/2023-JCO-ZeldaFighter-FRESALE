@@ -4,16 +4,14 @@
 #include "utilities.h"
 #include "gamecore.h"
 #include "gamescene.h"
-#include "gamescene.h"
 #include "gamecanvas.h"
-#include "resources.h"
-#include "utilities.h"
 #include "sprite.h"
 #include "projectile.h"
 
 Player::Player(): Sprite(GameFramework::imagesPath() + "JeuZelda/DownLink_1.gif")
 {
     //setDebugModeEnabled(true);
+    setData(GameCore::SpriteDataKey::SPRITE_TYPE_KEY, GameCore::PLAYER);
 }
 
 void Player::initializeHearts() {
@@ -44,8 +42,9 @@ void Player::damage() {
     delete m_pHearts.last();
     m_pHearts.remove(m_pHearts.length() - 1);
 
-    if(m_pHearts.length() < 1)
-        return;
+    if(m_pHearts.isEmpty()) {
+        isDead = true;
+    }
 }
 
 void Player::addHeart() {
@@ -57,7 +56,7 @@ void Player::addHeart() {
     GameScene* parentScene = this->parentScene();
     heart->setScale(GameCore::DECOR_SCALE_FACTOR);
     heart->setData(GameCore::SpriteDataKey::SPRITE_TYPE_KEY, GameCore::HEART);
-    int hearthX = 60 + m_pHearts.length() * (hearthWidth + ESPACE_ENTRE_COEURS);
+    int hearthX = m_pHearts.length() * (hearthWidth + ESPACE_ENTRE_COEURS);
     parentScene->addSpriteToScene(heart, hearthX, 20);
 }
 
@@ -74,6 +73,9 @@ void Player::removeSword() {
     parentScene()->removeSpriteFromScene(m_pSword);
     delete m_pSword;
     m_pSword = nullptr;
+}
+
+void Player::blinkRed() {
 }
 
 Player::~Player() {
