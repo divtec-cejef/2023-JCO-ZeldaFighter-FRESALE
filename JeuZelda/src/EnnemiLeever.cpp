@@ -71,7 +71,7 @@ void EnnemiLeever::damage() {
     m_Hp--;
     if(m_Hp <= 0) {
         CreateCloudOndeath(pos());
-        ChanceToSpawnItems(pos(), 9, 18);
+        ChanceToSpawnItems(pos(), 9, 18, 50);
         removeEnnemyFromScene();
     }
 }

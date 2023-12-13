@@ -22,17 +22,19 @@ public:
     void updatePlayer();
     void blinkRed();
     bool isDead = false;
+    float swordVitesse = 550.0;
+    Projectile* m_pSword = nullptr;
 
     int m_invincibleCooldown = 0;
     QList<Sprite*> m_pHearts = {};
 
     static constexpr float SWORD_SCALE_FACTOR = 4.0;
-    static constexpr float SWORD_VITESSE = 550.0;
+
 private:
     static constexpr int ESPACE_ENTRE_COEURS = 55;
     static constexpr int NOMBRES_COEURS = 3;
 
-    Projectile* m_pSword = nullptr;
+
 };
 
 #endif // PLAYER_H

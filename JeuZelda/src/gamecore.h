@@ -38,7 +38,8 @@ public:
         ENNEMI,
         PROJECTIL,
         HEARTDROP,
-        BLUE_RING
+        BLUE_RING,
+        TRIFORCE
     };
 
     enum GameMode {
@@ -72,6 +73,7 @@ public:
 
     void displayInformation(const QString& rMessage);
     void displayWaves(int waveNumber);
+    void restartGame();
     void clearInformation();
 
     GameMode m_gameMode = RUNNING;
@@ -79,7 +81,8 @@ public:
     static constexpr int SCENE_WIDTH = 1280;
     static constexpr float PLAYER_SCALE_FACTOR = 4;
     static constexpr float DECOR_SCALE_FACTOR = 5;
-    static constexpr float HEARTH_DROP_SCALE_FACTOR = 3.8;
+    static constexpr float WATER_SCALE_FACTOR = 4;
+    static constexpr float ITEM_DROP_SCALE_FACTOR = 3.8;
     static constexpr int MAX_HEARTH = 5;
 
 signals:

@@ -26,7 +26,6 @@ void Player::tick(int elapsedMs) {
         m_invincibleCooldown -= elapsedMs;
     else
         setOpacity(1.0);  // Rétablir l'opacité normale
-
     if(m_pSword != nullptr) {
         m_pSword->tick(elapsedMs);
     }
@@ -63,7 +62,7 @@ void Player::addHeart() {
 void Player::attack(QPointF direction) {
     if(m_pSword != nullptr)
         return;
-    m_pSword = new Projectile(SWORD_VITESSE, direction, GameFramework::imagesPath() + "JeuZelda/ZeldaSpriteSword.png", this);
+    m_pSword = new Projectile(swordVitesse, direction, GameFramework::imagesPath() + "JeuZelda/ZeldaSpriteSword.png", this);
     m_pSword->setScale(SWORD_SCALE_FACTOR);
     m_pSword->setPos(scenePos());
     parentScene()->addSpriteToScene(m_pSword);

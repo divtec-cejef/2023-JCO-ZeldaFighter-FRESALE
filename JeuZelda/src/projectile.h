@@ -10,9 +10,10 @@ public:
     void tick(long long elapsedTimeMs);
     void CreateCloudOndeath(QPointF pos);
     int m_nbreEnnemiDeath = 0;
+    qreal m_speed;
 
 private:
-    qreal m_speed;
+
     QPointF m_direction;
     Sprite* m_pOwner = nullptr;
 

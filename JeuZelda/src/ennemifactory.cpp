@@ -23,8 +23,8 @@ void EnnemiFactory::createWave(int nbreEnnemiLeever, int nbreEnnemiLeeverRouge, 
         //Ajout de l'ennemi à la scène
         m_pScene->addSpriteToScene(ennemi);
         //Positionnement de l'ennemi aléatoirement mais pas ou il y a déja d'autres collisions
-        ennemi->setX(std::rand() % (m_pScene->width() - ennemi->width()));
-        ennemi->setY(std::rand() % (m_pScene->height() - ennemi->height()));
+        ennemi->setX(std::rand() % (m_pScene->width() - ennemi->width() + 50));
+        ennemi->setY(std::rand() % (m_pScene->height() - ennemi->height() - 50));
     }
 
     for(int i = 0; i < nbreEnnemiLeeverRouge; i++) {
@@ -33,8 +33,8 @@ void EnnemiFactory::createWave(int nbreEnnemiLeever, int nbreEnnemiLeeverRouge, 
         //Ajout de l'ennemi à la scène
         m_pScene->addSpriteToScene(ennemi);
         //Positionnement de l'ennemi aléatoirement
-        ennemi->setX(std::rand() % (m_pScene->width() - ennemi->width()));
-        ennemi->setY(std::rand() % (m_pScene->height() - ennemi->height()));
+        ennemi->setX(std::rand() % (m_pScene->width() - ennemi->width() + 50));
+        ennemi->setY(std::rand() % (m_pScene->height() - ennemi->height() - 50));
     }
 
     for(int i = 0; i < nbreEnnemiOctopus; i++) {
@@ -43,8 +43,8 @@ void EnnemiFactory::createWave(int nbreEnnemiLeever, int nbreEnnemiLeeverRouge, 
         //Ajout de l'ennemi à la scène
         m_pScene->addSpriteToScene(ennemi);
         //Positionnement de l'ennemi aléatoirement
-        ennemi->setX(std::rand() % (m_pScene->width() - ennemi->width()));
-        ennemi->setY(std::rand() % (m_pScene->height() - ennemi->height()));
+        ennemi->setX(std::rand() % (m_pScene->width() - ennemi->width() + 50));
+        ennemi->setY(std::rand() % (m_pScene->height() - ennemi->height() - 50));
     }
 }
 

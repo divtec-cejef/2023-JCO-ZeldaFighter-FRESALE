@@ -65,7 +65,7 @@ void EnnemiOctopus::damage() {
     m_Hp--;
     if(m_Hp <= 0) {
         CreateCloudOndeath(pos());
-        ChanceToSpawnItems(pos(), 8, 16);
+        ChanceToSpawnItems(pos(), 8, 16, 50);
         removeEnnemyFromScene();
         removeProjectile();
     }

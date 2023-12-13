@@ -1,6 +1,6 @@
 /**
   Fichier qui contient toute la logique du jeu.
-  
+
   @author   JCO
   @date     Février 2014
  */
@@ -28,27 +28,26 @@
 //! \param pGameCanvas  GameCanvas pour lequel cet objet travaille.
 //! \param pParent      Pointeur sur le parent (afin d'obtenir une destruction automatique de cet objet).
 GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent) {
-    
+
     m_playerSpeed = 10;
 
     // Mémorise l'accès au canvas (qui gère le tick et l'affichage d'une scène)
     m_pGameCanvas = pGameCanvas;
-    
+
     // Créé la scène de base et indique au canvas qu'il faut l'afficher.
     m_pScene = pGameCanvas->createScene(0, 0, SCENE_WIDTH, SCENE_WIDTH / GameFramework::screenRatio());
     pGameCanvas->setCurrentScene(m_pScene);
-    
+
     // Trace un rectangle blanc tout autour des limites de la scène.
     m_pScene->addRect(m_pScene->sceneRect(), QPen(Qt::white));
-    
+
     // Instancier et initialiser les sprite ici :
     m_pPlayer = new Player();
     m_pScene->addSpriteToScene(m_pPlayer);
-    m_pPlayer->initializeHearts();
 
     // Création des ennemis grâce à la classe EnnemiFactory
     // EnnemiFactory* ennemifactoy = new EnnemiFactory(m_pScene);
-    // ennemifactoy->createVague(4,2,3);
+    // ennemifactoy->createWave(5,0,0);
 
     // Création des décors
     Sprite* pBush1 = new Sprite(GameFramework::imagesPath() + "JeuZelda/Bush.png");
@@ -72,24 +71,33 @@ GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent)
     pRock1->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
     m_pRock1 = pRock1;
 
-    // Création du point d'eau
-    //QPixmap brickImage = QPixmap(GameFramework::imagesPath() + "JeuZelda/Water.png");
-    //int brickWidth = brickImage.width() + 1;
-    //int brickHeight = brickImage.height() + 1;
+    // boucle qui permet de générer le bord de l'eau en bas de la scène
+    for(int i = 0; i < m_pScene->width(); i += 50) {
+        Sprite* pWater = new Sprite(GameFramework::imagesPath() + "JeuZelda/WaterBorderUp.png");
+        m_pScene->addSpriteToScene(pWater);
+        pWater->setPos(i, m_pScene->height() - 50);
+        pWater->setScale(WATER_SCALE_FACTOR);
+        pWater->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
+    }
 
-    //for (int row = 0; row < 5; row++) {
-    //    for (int col = 0; col < 1; col++) {
-    //        Sprite* pBrick1 = new Sprite(brickImage);
-    //        pBrick1->setData(SPRITE_TYPE_KEY, WATER);
-    //        pBrick1->setScale(DECOR_SQUALE_FACTOR);
-    //        m_pScene->addSpriteToScene(pBrick1, 1160 + col * brickWidth, 0 + row * brickHeight);
-    //    }
-    //}
+    // boucle qui permet de générer le bord de l'eau en haut de la scène
+    for(int i = 0; i < m_pScene->width(); i += 50) {
+        Sprite* pWater = new Sprite(GameFramework::imagesPath() + "JeuZelda/WaterBorderDown.png");
+        m_pScene->addSpriteToScene(pWater);
+        pWater->setPos(i, 0);
+        pWater->setScale(WATER_SCALE_FACTOR);
+        pWater->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
+    }
+
+
 
     // Center le joueur au millieu de la scène.
     m_pPlayer->setOffset(-m_pPlayer->sceneBoundingRect().width()/2, -m_pPlayer->sceneBoundingRect().width()/2);
     m_pPlayer->setScale(PLAYER_SCALE_FACTOR);
     m_pPlayer->setPos(m_pScene->width()/2.0, m_pScene->height()/2.0);
+
+    // Initialise les coeurs du joueur
+    m_pPlayer->initializeHearts();
 
     // Fond d'écran de la scène.
     m_pScene->setBackgroundColor(QColor(252, 216, 168));
@@ -191,7 +199,12 @@ void GameCore::keyReleased(int key) {
             m_gameMode = RUNNING;
             clearInformation();
             break;
+
+        case ENDED_LOSE:
+            restartGame();
+            break;
         }
+
     }
     // Réinitialiser l'état de la touche correspondante
     switch (key) {
@@ -305,11 +318,14 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
             m_pPlayer->damage();
             if(m_pPlayer->isDead) {
                 m_gameMode = ENDED_LOSE;
+                if (m_pGameCanvas->isTicking()) {
+                    m_pGameCanvas->stopTick();
+                }
                 displayInformation("Game Over !");
                 qDebug() << "Le joueur est mort";
             }
         } else if (pCollisionned->data(SPRITE_TYPE_KEY).toInt() == HEARTDROP) {
-            // Ajoute un coeur au joueur si il en a moin de 6
+            // Ajoute un coeur au joueur si il en a moin de MAX_HEARTH
             if(m_pPlayer->m_pHearts.length() < MAX_HEARTH) {
                 m_pPlayer->addHeart();
             }
@@ -317,17 +333,32 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
             m_pScene->removeSpriteFromScene(pCollisionned);
             delete pCollisionned;
         } else if(pCollisionned->data(SPRITE_TYPE_KEY).toInt() == BLUE_RING) {
-            // Le joueur devient invincible pendant 5 secondes, iol clignote au bout de 3 secondes
-            m_pPlayer->m_invincibleCooldown = 5000;
-            m_pPlayer->setOpacity(0.5);
-            // supprime le blue ring de la scène une fois que le joueur l'a touchée
+            // Le projectile (épée) du joueur va 2 fois plus vite pendant 5 secondes
+            qDebug() << "Blue Ring touché";
+                        m_pPlayer->swordVitesse *= 2;
+
+            QTimer::singleShot(5000, m_pPlayer, [this]() {
+                m_pPlayer->swordVitesse = 550.0;
+            });
+            // supprime le Blue Ring de la scène une fois que le joueur l'a touchée
+            m_pScene->removeSpriteFromScene(pCollisionned);
+            delete pCollisionned;
+        } else if(pCollisionned->data(SPRITE_TYPE_KEY).toInt() == TRIFORCE) {
+            // Tous les ennemis de la scène perde 1 hp
+            auto children = m_pScene->items();
+            for(auto child: children) {
+                if (Ennemy* ennemi = dynamic_cast<Ennemy*>(child)) {
+                    ennemi->damage();
+                }
+            }
+            // supprime la triforce de la scène une fois que le joueur l'a touchée
             m_pScene->removeSpriteFromScene(pCollisionned);
             delete pCollisionned;
         }
     }
 
     if (!isCollidingWithDecor) {
-        // Adjust player speed based on whether the player is in water or not
+
         if (isInWater) {
             m_playerSpeed = 5;
         } else {
@@ -398,7 +429,7 @@ void GameCore::displayInformation(const QString& rMessage) {
     QFont customFont(policeZelda);
 
     // Agrandit le texte
-    customFont.setPointSize(25);
+    customFont.setPointSize(30);
 
     // Créer l'élément texte avec la police personnalisée
     QGraphicsSimpleTextItem* pText = m_pScene->createText(QPointF(0,0), rMessage, 50, Qt::red);
@@ -454,6 +485,43 @@ void GameCore::clearInformation() {
         delete m_pDisplayedInformation;
         m_pDisplayedInformation = nullptr;
     }
+}
+
+void GameCore::restartGame() {
+    // Supprime tous les ennemi et les projectiles de la scène
+    auto children = m_pScene->items();
+    for(auto child: children) {
+        if (Ennemy* ennemi = dynamic_cast<Ennemy*>(child)) {
+            if(EnnemiOctopus* ennemiOctopus = dynamic_cast<EnnemiOctopus*>(child)) {
+                ennemiOctopus->removeProjectile();
+            }
+            m_pScene->removeSpriteFromScene(ennemi);
+            delete ennemi;
+        }
+    }
+
+    // Supprime le joueur
+    delete m_pPlayer;
+
+    // Réinitialise le numéro de vague
+    m_currentWave = 1;
+
+    // Réinitialise le joueur
+    m_pPlayer = new Player();
+    m_pScene->addSpriteToScene(m_pPlayer);
+    m_pPlayer->setOffset(-m_pPlayer->sceneBoundingRect().width()/2, -m_pPlayer->sceneBoundingRect().width()/2);
+    m_pPlayer->setScale(PLAYER_SCALE_FACTOR);
+    m_pPlayer->setPos(m_pScene->width()/2.0, m_pScene->height()/2.0);
+    m_pPlayer->initializeHearts();
+
+    // Réinitialise le mode de jeu
+    m_gameMode = RUNNING;
+
+    // Efface le texte affiché
+    clearInformation();
+
+    // Redémarre le tick arrêté au moment du Game Over
+    m_pGameCanvas->startTick();
 }
 
 void GameCore::updatePlayer() {

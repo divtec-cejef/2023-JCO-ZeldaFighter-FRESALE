@@ -61,10 +61,10 @@ void Projectile::tick(long long elapsedTimeMs) {
             if(EnnemiOctopus* pEnnemy = dynamic_cast<EnnemiOctopus*>(m_pOwner)) {
                 pEnnemy->removeProjectile();
             }
-            // si un projectil du joueur touche le projectil dun ennemi, on supprime le projectil du joueur
+            // si un projectil du joueur touche le projectil d'un ennemi, on supprime le projectil de l'ennemi
         } else if(pCollisionned->data(GameCore::SPRITE_TYPE_KEY) == GameCore::PROJECTIL) {
-            if(Player* player = dynamic_cast<Player*>(m_pOwner)) {
-                player->removeSword();
+            if(EnnemiOctopus* pEnnemy = dynamic_cast<EnnemiOctopus*>(m_pOwner)) {
+                pEnnemy->removeProjectile();
             }
         }
     }

@@ -72,7 +72,7 @@ void EnnemiLeeverRouge::damage() {
     m_Hp--;
     if(m_Hp <= 0) {
         CreateCloudOndeath(pos());
-        ChanceToSpawnItems(pos(), 7, 14);
+        ChanceToSpawnItems(pos(), 7, 14, 50);
         removeEnnemyFromScene();
     } else {
         // Change la couleur de l'ennemi pour indiquer qu'il a été touché.
