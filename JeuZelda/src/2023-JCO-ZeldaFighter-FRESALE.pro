@@ -19,6 +19,7 @@ TEMPLATE = app
 #DEFINES += DEPLOY # Pour une compilation dans un but de déploiement
 
 SOURCES += main.cpp\
+    Decor.cpp \
     EnnemiLeever.cpp \
     EnnemiLeeverRouge.cpp \
     ennemifactory.cpp \
@@ -37,6 +38,7 @@ SOURCES += main.cpp\
     spritetickhandler.cpp
 
 HEADERS  += mainfrm.h \
+    Decor.h \
     EnnemiLeever.h \
     EnnemiLeeverRouge.h \
     ennemifactory.h \

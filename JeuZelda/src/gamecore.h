@@ -36,6 +36,7 @@ public:
         WATER,
         HEART,
         ENNEMI,
+        FIRE,
         PROJECTIL,
         HEARTDROP,
         BLUE_RING,
@@ -45,7 +46,8 @@ public:
     enum GameMode {
         RUNNING,
         PAUSE,
-        ENDED_LOSE
+        ENDED_LOSE,
+        START
     };
 
     enum SpriteDataKey {
@@ -74,6 +76,7 @@ public:
     void displayInformation(const QString& rMessage);
     void displayWaves(int waveNumber);
     void restartGame();
+    void removeItemsByType(int spriteType);
     void clearInformation();
 
     GameMode m_gameMode = RUNNING;
@@ -119,7 +122,7 @@ private:
     bool hasSAnimationPlayed = false;
     bool hasDAnimationPlayed = false;
     QGraphicsSimpleTextItem* m_pDisplayedInformation;
-    QGraphicsSimpleTextItem* m_pDisplayedNbreVagues;
+    QGraphicsSimpleTextItem* m_pDisplayedNumberWaves;
     QList<int> m_pressedKeys;
 
 private slots:

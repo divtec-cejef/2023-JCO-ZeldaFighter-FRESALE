@@ -23,6 +23,7 @@
 #include "ennemifactory.h"
 #include "ennemileeverrouge.h"
 #include "ennemioctopus.h"
+#include "decor.h"
 
 //! Initialise le contrôleur de jeu.
 //! \param pGameCanvas  GameCanvas pour lequel cet objet travaille.
@@ -46,67 +47,21 @@ GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent)
     m_pScene->addSpriteToScene(m_pPlayer);
 
     // Création des ennemis grâce à la classe EnnemiFactory
-    // EnnemiFactory* ennemifactoy = new EnnemiFactory(m_pScene);
-    // ennemifactoy->createWave(5,0,0);
-
-    // Création des décors
-    Sprite* pBush1 = new Sprite(GameFramework::imagesPath() + "JeuZelda/Bush.png");
-    m_pScene->addSpriteToScene(pBush1);
-    pBush1->setPos(200, 200);
-    pBush1->setScale(DECOR_SCALE_FACTOR);
-    pBush1->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
-    m_pBush1 = pBush1;
-
-    Sprite* pBush2 = new Sprite(GameFramework::imagesPath() + "JeuZelda/Bush.png");
-    m_pScene->addSpriteToScene(pBush2);
-    pBush2->setPos(300, 550);
-    pBush2->setScale(DECOR_SCALE_FACTOR);
-    pBush2->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
-    m_pBush2 = pBush2;
-
-    Sprite* pRock1 = new Sprite(GameFramework::imagesPath() + "JeuZelda/Rock.png");
-    m_pScene->addSpriteToScene(pRock1);
-    pRock1->setPos(1000, 200);
-    pRock1->setScale(DECOR_SCALE_FACTOR);
-    pRock1->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
-    m_pRock1 = pRock1;
-
-    // boucle qui permet de générer le bord de l'eau en bas de la scène
-    for(int i = 0; i < m_pScene->width(); i += 50) {
-        Sprite* pWater = new Sprite(GameFramework::imagesPath() + "JeuZelda/WaterBorderUp.png");
-        m_pScene->addSpriteToScene(pWater);
-        pWater->setPos(i, m_pScene->height() - 50);
-        pWater->setScale(WATER_SCALE_FACTOR);
-        pWater->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
-    }
-
-    // boucle qui permet de générer le bord de l'eau en haut de la scène
-    for(int i = 0; i < m_pScene->width(); i += 50) {
-        Sprite* pWater = new Sprite(GameFramework::imagesPath() + "JeuZelda/WaterBorderDown.png");
-        m_pScene->addSpriteToScene(pWater);
-        pWater->setPos(i, 0);
-        pWater->setScale(WATER_SCALE_FACTOR);
-        pWater->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
-    }
-
-
+    // EnnemiFactory* ennemifactory = new EnnemiFactory(m_pScene);
+    // ennemifactory->createWave(25,0,0);
 
     // Center le joueur au millieu de la scène.
     m_pPlayer->setOffset(-m_pPlayer->sceneBoundingRect().width()/2, -m_pPlayer->sceneBoundingRect().width()/2);
     m_pPlayer->setScale(PLAYER_SCALE_FACTOR);
     m_pPlayer->setPos(m_pScene->width()/2.0, m_pScene->height()/2.0);
 
-    // Initialise les coeurs du joueur
-    m_pPlayer->initializeHearts();
-
-    // Fond d'écran de la scène.
-    m_pScene->setBackgroundColor(QColor(252, 216, 168));
-
     // Démarre le tick pour que les animations qui en dépendent fonctionnent correctement.
     // Attention : il est important que l'enclenchement du tick soit fait vers la fin de cette fonction,
     // sinon le temps passé jusqu'au premier tick (ElapsedTime) peut être élevé et provoquer de gros
     // déplacements, surtout si le déboggueur est démarré.
     m_pGameCanvas->startTick();
+
+    m_gameMode = START;
 
 }
 
@@ -119,6 +74,128 @@ GameCore::~GameCore() {
 void GameCore::keyPressed(int key) {
     // Mettre à jour l'état de la touche correspondante
     switch (key) {
+    case Qt::Key_1:
+        if(m_gameMode == START) {
+            m_gameMode = RUNNING;
+
+            // Création des décors
+            Decor* pBush1 = new Decor(GameFramework::imagesPath() + "JeuZelda/Bush.png", 200, 200);
+            m_pScene->addSpriteToScene(pBush1);
+
+            Decor* pBush2 = new Decor(GameFramework::imagesPath() + "JeuZelda/Bush.png", 300, 550);
+            m_pScene->addSpriteToScene(pBush2);
+
+            Decor* pRock1 = new Decor(GameFramework::imagesPath() + "JeuZelda/Rock.png", 1000, 200);
+            m_pScene->addSpriteToScene(pRock1);
+
+            // Fond d'écran de la scène.
+            m_pScene->setBackgroundColor(QColor(252, 216, 168));
+
+            // Initialise les coeurs du joueur
+            m_pPlayer->initializeHearts();
+        }
+        break;
+    case Qt::Key_2:
+        if(m_gameMode == START) {
+            m_gameMode = RUNNING;
+
+            // Création des décors
+            Decor* pBush1 = new Decor(GameFramework::imagesPath() + "JeuZelda/Bush.png", 200, 200);
+            m_pScene->addSpriteToScene(pBush1);
+
+            Decor* pBush2 = new Decor(GameFramework::imagesPath() + "JeuZelda/Bush.png", 300, 550);
+            m_pScene->addSpriteToScene(pBush2);
+
+            Decor* pRock1 = new Decor(GameFramework::imagesPath() + "JeuZelda/Rock.png", 1000, 200);
+            m_pScene->addSpriteToScene(pRock1);
+
+            // boucle qui permet de générer le bord de l'eau en bas de la scène
+            for(int i = 0; i < m_pScene->width(); i += 50) {
+                Sprite* pWater = new Sprite(GameFramework::imagesPath() + "JeuZelda/WaterBorderUp.png");
+                m_pScene->addSpriteToScene(pWater);
+                pWater->setPos(i, m_pScene->height() - 50);
+                pWater->setScale(WATER_SCALE_FACTOR);
+                pWater->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
+            }
+
+            // boucle qui permet de générer le bord de l'eau en haut de la scène
+            for(int i = 0; i < m_pScene->width(); i += 50) {
+                Sprite* pWater = new Sprite(GameFramework::imagesPath() + "JeuZelda/WaterBorderDown.png");
+                m_pScene->addSpriteToScene(pWater);
+                pWater->setPos(i, 0);
+                pWater->setScale(WATER_SCALE_FACTOR);
+                pWater->setData(SPRITE_TYPE_KEY, SpriteType::DECOR);
+            }
+
+            // Fond d'écran de la scène.
+            m_pScene->setBackgroundColor(QColor(252, 216, 168));
+
+            // Initialise les coeurs du joueur
+            m_pPlayer->initializeHearts();
+        }
+        break;
+    case Qt::Key_3:
+        if(m_gameMode == START) {
+            m_gameMode = RUNNING;
+
+            // Création du feu
+            Sprite* pFire = new Sprite(GameFramework::imagesPath() + "JeuZelda/Fire_1.gif");
+            pFire->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Fire_1.gif");
+            pFire->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Fire_2.gif");
+            pFire->setAnimationSpeed(100);
+            pFire->startAnimation();
+            m_pScene->addSpriteToScene(pFire);
+            pFire->setScale(DECOR_SCALE_FACTOR);
+            pFire->setPos(100, 100);
+            pFire->setData(SPRITE_TYPE_KEY, SpriteType::FIRE);
+
+            Sprite* pFire2 = new Sprite(GameFramework::imagesPath() + "JeuZelda/Fire_1.gif");
+            pFire2->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Fire_1.gif");
+            pFire2->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Fire_2.gif");
+            pFire2->setAnimationSpeed(100);
+            pFire2->startAnimation();
+            m_pScene->addSpriteToScene(pFire2);
+            pFire2->setScale(DECOR_SCALE_FACTOR);
+            pFire2->setPos(700, 180);
+            pFire2->setData(SPRITE_TYPE_KEY, SpriteType::FIRE);
+
+            Sprite* pFire3 = new Sprite(GameFramework::imagesPath() + "JeuZelda/Fire_1.gif");
+            pFire3->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Fire_1.gif");
+            pFire3->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Fire_2.gif");
+            pFire3->setAnimationSpeed(100);
+            pFire3->startAnimation();
+            m_pScene->addSpriteToScene(pFire3);
+            pFire3->setScale(DECOR_SCALE_FACTOR);
+            pFire3->setPos(1000, 70);
+            pFire3->setData(SPRITE_TYPE_KEY, SpriteType::FIRE);
+
+            Sprite* pFire4 = new Sprite(GameFramework::imagesPath() + "JeuZelda/Fire_1.gif");
+            pFire4->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Fire_1.gif");
+            pFire4->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Fire_2.gif");
+            pFire4->setAnimationSpeed(100);
+            pFire4->startAnimation();
+            m_pScene->addSpriteToScene(pFire4);
+            pFire4->setScale(DECOR_SCALE_FACTOR);
+            pFire4->setPos(900, 550);
+            pFire4->setData(SPRITE_TYPE_KEY, SpriteType::FIRE);
+
+            Sprite* pFire5 = new Sprite(GameFramework::imagesPath() + "JeuZelda/Fire_1.gif");
+            pFire5->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Fire_1.gif");
+            pFire5->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Fire_2.gif");
+            pFire5->setAnimationSpeed(100);
+            pFire5->startAnimation();
+            m_pScene->addSpriteToScene(pFire5);
+            pFire5->setScale(DECOR_SCALE_FACTOR);
+            pFire5->setPos(300, 400);
+            pFire5->setData(SPRITE_TYPE_KEY, SpriteType::FIRE);
+
+            // Fond d'écran de la scène.
+            m_pScene->setBackgroundColor(QColor(120, 116, 116));
+
+            // Initialise les coeurs du joueur
+            m_pPlayer->initializeHearts();
+        }
+        break;
     case Qt::Key_Left:
         isLeftKeyPressed = true;
         if (!m_pressedKeys.contains(key)) {
@@ -186,10 +263,13 @@ void GameCore::keyPressed(int key) {
 void GameCore::keyReleased(int key) {
     if(key == Qt::Key_Space) {
         switch (m_gameMode) {
-        case RUNNING:
-            if (m_pGameCanvas->isTicking()) {
+        case RUNNING :
+            if(m_pGameCanvas->isTicking()) {
                 m_pGameCanvas->stopTick();
-                displayInformation("Press space to continue");
+                m_gameMode = PAUSE;
+                qDebug() << "Jeu en pause";
+                displayInformation("Presse space to continue \n"
+                                   "Presse escape to restart");
             } else {
                 clearInformation();
                 m_pGameCanvas->startTick();
@@ -202,30 +282,35 @@ void GameCore::keyReleased(int key) {
 
         case ENDED_LOSE:
             restartGame();
+            // m_gameMode = START;
             break;
         }
-
     }
+
+    if(key == Qt::Key_Escape) {
+        switch (m_gameMode) {
+        case PAUSE:
+            restartGame();
+            break;
+        }
+    }
+
     // Réinitialiser l'état de la touche correspondante
     switch (key) {
     case Qt::Key_Left:
         isLeftKeyPressed = false;
-        m_pPlayer->clearAnimations();
         m_pressedKeys.removeAll(key);
         break;
     case Qt::Key_Right:
         isRightKeyPressed = false;
-        m_pPlayer->clearAnimations();
         m_pressedKeys.removeAll(key);
         break;
     case Qt::Key_Up:
         isUpKeyPressed = false;
-        m_pPlayer->clearAnimations();
         m_pressedKeys.removeAll(key);
         break;
     case Qt::Key_Down:
         isDownKeyPressed = false;
-        m_pPlayer->clearAnimations();
         m_pressedKeys.removeAll(key);
         break;
     case Qt::Key_W:
@@ -313,7 +398,7 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
             }
         } else if (pCollisionned->data(SPRITE_TYPE_KEY).toInt() == WATER) {
             isInWater = true;
-        } else if (pCollisionned->data(SPRITE_TYPE_KEY).toInt() == ENNEMI) {
+        } else if (pCollisionned->data(SPRITE_TYPE_KEY).toInt() == ENNEMI || pCollisionned->data(SPRITE_TYPE_KEY).toInt() == FIRE) {
             // Le joueur prend des dégâts
             m_pPlayer->damage();
             if(m_pPlayer->isDead) {
@@ -328,6 +413,7 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
             // Ajoute un coeur au joueur si il en a moin de MAX_HEARTH
             if(m_pPlayer->m_pHearts.length() < MAX_HEARTH) {
                 m_pPlayer->addHeart();
+                qDebug() << "Coeur ajouté";
             }
             // supprime le coeur de la scène une fois que le joueur l'a touchée
             m_pScene->removeSpriteFromScene(pCollisionned);
@@ -392,27 +478,29 @@ void GameCore::generateEnemyWave() {
         int nbreEnnemiLeeverRouge = 0;
         int nbreEnnemiOctopus = 0;
 
-        for(int i = 0; i < m_currentWave; i++) {
-            // Générer un nombre aléatoire entre 0 et 5 inclus
-            int random = QRandomGenerator::global()->bounded(0, 5);
-            // Si le nombre est 0, créer un ennemi Leever Rouge
-            if (random == 0 && m_currentWave > 2) {
-                nbreEnnemiLeeverRouge++;
-                // Si le nombre est 1, créer un ennemi Octopus
-            } else if(random == 1 && m_currentWave > 5) {
-                nbreEnnemiOctopus++;
-            } else {
-                // Sinon créer un ennemi Leever
-                nbreEnnemiLeever++;
+        if(m_gameMode == RUNNING) {
+            for(int i = 0; i < m_currentWave; i++) {
+                // Générer un nombre aléatoire entre 0 et 5 inclus
+                int random = QRandomGenerator::global()->bounded(0, 5);
+                // Si le nombre est 0, créer un ennemi Leever Rouge
+                if (random == 0 && m_currentWave > 2) {
+                    nbreEnnemiLeeverRouge++;
+                    // Si le nombre est 1, créer un ennemi Octopus
+                } else if(random == 1 && m_currentWave > 5) {
+                    nbreEnnemiOctopus++;
+                } else {
+                    // Sinon créer un ennemi Leever
+                    nbreEnnemiLeever++;
+                }
             }
-        }
-        ennemiFactory->createWave(nbreEnnemiLeever, nbreEnnemiLeeverRouge, nbreEnnemiOctopus);
+            ennemiFactory->createWave(nbreEnnemiLeever, nbreEnnemiLeeverRouge, nbreEnnemiOctopus);
 
-        // Afficher le numéro de la vague
-        displayWaves(m_currentWave);
-        // Incrémenter le numéro de vague actuel
-        m_currentWave++;
-        delete ennemiFactory;
+            // Afficher le numéro de la vague
+            displayWaves(m_currentWave);
+            // Incrémenter le numéro de vague actuel
+            m_currentWave++;
+            delete ennemiFactory;
+        }
     }
 }
 
@@ -423,10 +511,10 @@ void GameCore::displayInformation(const QString& rMessage) {
 
     // Charger la police personnalisée (police du jeu de base Zelda (NES))
     int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
-    QString policeZelda = QFontDatabase::applicationFontFamilies(id).at(0);
+    QString ZeldaFont = QFontDatabase::applicationFontFamilies(id).at(0);
 
     // Créer la police
-    QFont customFont(policeZelda);
+    QFont customFont(ZeldaFont);
 
     // Agrandit le texte
     customFont.setPointSize(30);
@@ -448,33 +536,33 @@ void GameCore::displayWaves(int waveNumber) {
 
     // Charger la police personnalisée (police du jeu de base Zelda (NES))
     int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
-    QString policeZelda = QFontDatabase::applicationFontFamilies(id).at(0);
+    QString ZeldaFont = QFontDatabase::applicationFontFamilies(id).at(0);
 
     // Créer la police personnalisée
-    QFont customFont(policeZelda);
+    QFont customFont(ZeldaFont);
 
     // Vérifier si le texte existe déjà, sinon le créer
-    if (!m_pDisplayedNbreVagues) {
+    if (!m_pDisplayedNumberWaves) {
         // Affichage du message en gras avec la police personnalisée.
-        m_pDisplayedNbreVagues = m_pScene->createText(QPointF(0, 0), message, 50, Qt::red);
+        m_pDisplayedNumberWaves = m_pScene->createText(QPointF(0, 0), message, 50, Qt::red);
 
         // Agrandit le texte
         customFont.setPointSize(30);
 
         // Place le texte en haut à droite de l'écran
-        m_pDisplayedNbreVagues->setX(m_pScene->width() - m_pDisplayedNbreVagues->boundingRect().width() - 80);
+        m_pDisplayedNumberWaves->setX(m_pScene->width() - m_pDisplayedNumberWaves->boundingRect().width() - 80);
 
         // Applique la police mise à jour
-        m_pDisplayedNbreVagues->setFont(customFont);
+        m_pDisplayedNumberWaves->setFont(customFont);
     } else {
         // Mettre à jour le texte existant avec la nouvelle police
-        m_pDisplayedNbreVagues->setText(message);
+        m_pDisplayedNumberWaves->setText(message);
 
         // Agrandit le texte
         customFont.setPointSize(30);
 
         // Applique la police mise à jour
-        m_pDisplayedNbreVagues->setFont(customFont);
+        m_pDisplayedNumberWaves->setFont(customFont);
     }
 }
 
@@ -500,6 +588,51 @@ void GameCore::restartGame() {
         }
     }
 
+    // supprime tous les coeur au sol
+    auto children2 = m_pScene->items();
+    for(auto child: children2) {
+        if (Sprite* sprite = dynamic_cast<Sprite*>(child)) {
+            if(sprite->data(SPRITE_TYPE_KEY).toInt() == HEARTDROP) {
+                m_pScene->removeSpriteFromScene(sprite);
+                delete sprite;
+            }
+        }
+    }
+
+    // supprime tous les Blue Ring au sol
+    auto children3 = m_pScene->items();
+    for(auto child: children3) {
+        if (Sprite* sprite = dynamic_cast<Sprite*>(child)) {
+            if(sprite->data(SPRITE_TYPE_KEY).toInt() == BLUE_RING) {
+                m_pScene->removeSpriteFromScene(sprite);
+                delete sprite;
+            }
+        }
+    }
+
+    // supprime toutes les Triforce au sol
+    auto children4 = m_pScene->items();
+    for(auto child: children4) {
+        if (Sprite* sprite = dynamic_cast<Sprite*>(child)) {
+            if(sprite->data(SPRITE_TYPE_KEY).toInt() == TRIFORCE) {
+                m_pScene->removeSpriteFromScene(sprite);
+                delete sprite;
+            }
+        }
+    }
+
+    // supprime tous les décors
+    auto children5 = m_pScene->items();
+    for(auto child: children5) {
+        if (Decor* decor = dynamic_cast<Decor*>(child)) {
+            m_pScene->removeSpriteFromScene(decor);
+            delete decor;
+        }
+    }
+
+    // remet le fond en noir
+    m_pScene->setBackgroundColor(QColor(0, 0, 0));
+
     // Supprime le joueur
     delete m_pPlayer;
 
@@ -512,10 +645,12 @@ void GameCore::restartGame() {
     m_pPlayer->setOffset(-m_pPlayer->sceneBoundingRect().width()/2, -m_pPlayer->sceneBoundingRect().width()/2);
     m_pPlayer->setScale(PLAYER_SCALE_FACTOR);
     m_pPlayer->setPos(m_pScene->width()/2.0, m_pScene->height()/2.0);
-    m_pPlayer->initializeHearts();
+
+    // Supprime l'épée du joueursi elle est encore présente au moment du Game Over
+    m_pPlayer->removeSword();
 
     // Réinitialise le mode de jeu
-    m_gameMode = RUNNING;
+    m_gameMode = START;
 
     // Efface le texte affiché
     clearInformation();
