@@ -42,18 +42,21 @@ GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent)
     // Trace un rectangle blanc tout autour des limites de la scène.
     m_pScene->addRect(m_pScene->sceneRect(), QPen(Qt::white));
 
-    // Instancier et initialiser les sprite ici :
-    m_pPlayer = new Player();
-    m_pScene->addSpriteToScene(m_pPlayer);
-
     // Création des ennemis grâce à la classe EnnemiFactory
     // EnnemiFactory* ennemifactory = new EnnemiFactory(m_pScene);
     // ennemifactory->createWave(25,0,0);
 
-    // Center le joueur au millieu de la scène.
+    // Crée un nouveau joueur
+    m_pPlayer = new Player();
+    m_pScene->addSpriteToScene(m_pPlayer);
+
+    // Centre le joueur au millieu de la scène.
     m_pPlayer->setOffset(-m_pPlayer->sceneBoundingRect().width()/2, -m_pPlayer->sceneBoundingRect().width()/2);
     m_pPlayer->setScale(PLAYER_SCALE_FACTOR);
     m_pPlayer->setPos(m_pScene->width()/2.0, m_pScene->height()/2.0);
+
+    // Rend le joueur invisible au début du jeu
+    m_pPlayer->setVisible(false);
 
     // Démarre le tick pour que les animations qui en dépendent fonctionnent correctement.
     // Attention : il est important que l'enclenchement du tick soit fait vers la fin de cette fonction,
@@ -63,6 +66,15 @@ GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent)
 
     m_gameMode = START;
 
+    // Affiche les levels et le titre du jeu au joueur
+    displayLevelInformation("THE LEGEND OF ZELDA FIGHTER \n"
+                            "\n"
+                            "    1 - Field of Hyrule \n"
+                            "    2 - Riverside \n"
+                            "    3 - Death Mountain \n");
+
+    displayItemsInformation();
+    displayEnnemyInformation();
 }
 
 //! Destructeur de GameCore : efface les scènes
@@ -75,6 +87,7 @@ void GameCore::keyPressed(int key) {
     // Mettre à jour l'état de la touche correspondante
     switch (key) {
     case Qt::Key_1:
+        // Création du niveau "Field of Hyrule"
         if(m_gameMode == START) {
             m_gameMode = RUNNING;
 
@@ -93,9 +106,12 @@ void GameCore::keyPressed(int key) {
 
             // Initialise les coeurs du joueur
             m_pPlayer->initializeHearts();
+
+            qDebug() << "Level 1 crée";
         }
         break;
     case Qt::Key_2:
+        // Création du niveau "Riverside"
         if(m_gameMode == START) {
             m_gameMode = RUNNING;
 
@@ -105,6 +121,9 @@ void GameCore::keyPressed(int key) {
 
             Decor* pBush2 = new Decor(GameFramework::imagesPath() + "JeuZelda/Bush.png", 300, 550);
             m_pScene->addSpriteToScene(pBush2);
+
+            Decor* pBush3 = new Decor(GameFramework::imagesPath() + "JeuZelda/Bush.png", 900, 400);
+            m_pScene->addSpriteToScene(pBush3);
 
             Decor* pRock1 = new Decor(GameFramework::imagesPath() + "JeuZelda/Rock.png", 1000, 200);
             m_pScene->addSpriteToScene(pRock1);
@@ -132,11 +151,24 @@ void GameCore::keyPressed(int key) {
 
             // Initialise les coeurs du joueur
             m_pPlayer->initializeHearts();
+
+            qDebug() << "Level 2 crée";
         }
         break;
     case Qt::Key_3:
+        // création du niveau "Death Mountain"
         if(m_gameMode == START) {
             m_gameMode = RUNNING;
+
+            // Création des décors
+            Decor* pRock1 = new Decor(GameFramework::imagesPath() + "JeuZelda/WhiteRock.png", 200, 200);
+            m_pScene->addSpriteToScene(pRock1);
+
+            Decor* pRock2 = new Decor(GameFramework::imagesPath() + "JeuZelda/WhiteRock.png", 650, 500);
+            m_pScene->addSpriteToScene(pRock2);
+
+            Decor* pBush = new Decor(GameFramework::imagesPath() + "JeuZelda/WhiteBush.png", 1010, 350);
+            m_pScene->addSpriteToScene(pBush);
 
             // Création du feu
             Sprite* pFire = new Sprite(GameFramework::imagesPath() + "JeuZelda/Fire_1.gif");
@@ -194,6 +226,8 @@ void GameCore::keyPressed(int key) {
 
             // Initialise les coeurs du joueur
             m_pPlayer->initializeHearts();
+
+            qDebug() << "Level 3 crée";
         }
         break;
     case Qt::Key_Left:
@@ -271,18 +305,16 @@ void GameCore::keyReleased(int key) {
                 displayInformation("Presse space to continue \n"
                                    "Presse escape to restart");
             } else {
-                clearInformation();
+                clearDisplayInformation();
                 m_pGameCanvas->startTick();
             }
             break;
         case PAUSE:
             m_gameMode = RUNNING;
-            clearInformation();
+            clearDisplayInformation();
             break;
-
         case ENDED_LOSE:
             restartGame();
-            // m_gameMode = START;
             break;
         }
     }
@@ -290,6 +322,7 @@ void GameCore::keyReleased(int key) {
     if(key == Qt::Key_Escape) {
         switch (m_gameMode) {
         case PAUSE:
+            qDebug() << "Le joueur quitte la partie";
             restartGame();
             break;
         }
@@ -342,7 +375,6 @@ void GameCore::keyReleased(int key) {
     }
 }
 
-
 void GameCore::tick(long long elapsedTimeInMilliseconds) {
     m_pPlayer->tick(static_cast<int>(elapsedTimeInMilliseconds));
 
@@ -360,7 +392,20 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
 
     countEnnemies();
     generateEnemyWave();
-    updatePlayer();
+    // updatePlayer();
+
+    // Si le joueur est en train de jouer, on efface les informations de l'écran de début
+    if(m_gameMode == RUNNING) {
+        // Rend le joueur visible au lancement de la partie
+        m_pPlayer->setVisible(true);
+        updatePlayer();
+        clearLevelInformation();
+        clearItemsInformation();
+        clearEnnemyInformation();
+    } else {
+        // Rend le joueur invisible s'il ne se trouve pas dans une partie (RUNNING)
+        m_pPlayer->setVisible(false);
+    }
 
     QList<Sprite*> collisions = m_pScene->collidingSprites(m_pPlayer);
     bool isInWater = false;
@@ -453,6 +498,8 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
     }
 }
 
+//! Fonction qui compte le nombre d'ennemi sur la scène
+//! \return le nombre d'ennemi sur la scène
 int GameCore::countEnnemies() {
     int nbreEnnemi = 0;
     auto children = m_pScene->items();
@@ -507,7 +554,7 @@ void GameCore::generateEnemyWave() {
 //! Si un message est déjà affiché, il est remplacé par ce nouveau message.
 //! \param rMessage Message à afficher.
 void GameCore::displayInformation(const QString& rMessage) {
-    clearInformation();
+    clearDisplayInformation();
 
     // Charger la police personnalisée (police du jeu de base Zelda (NES))
     int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
@@ -532,7 +579,7 @@ void GameCore::displayInformation(const QString& rMessage) {
 
 void GameCore::displayWaves(int waveNumber) {
     // Construire le message avec le numéro de la vague
-    QString message = "Vague " + QString::number(waveNumber);
+    QString message = "Wave " + QString::number(waveNumber);
 
     // Charger la police personnalisée (police du jeu de base Zelda (NES))
     int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
@@ -566,12 +613,280 @@ void GameCore::displayWaves(int waveNumber) {
     }
 }
 
+void GameCore::displayLevelInformation(QString const& rMessage) {
+    // Construire le message avec le numéro de la vague
+    QString message = rMessage;
+
+    // Charger la police personnalisée (police du jeu de base Zelda (NES))
+    int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
+    QString ZeldaFont = QFontDatabase::applicationFontFamilies(id).at(0);
+
+    // Créer la police personnalisée
+    QFont customFont(ZeldaFont);
+
+    // Vérifier si le texte existe déjà, sinon le créer
+    if (!m_pDisplayedLevelInformation) {
+        // Affichage du message en gras avec la police personnalisée.
+        m_pDisplayedLevelInformation = m_pScene->createText(QPointF(0, 0), message, 50, Qt::white);
+
+        // Agrandit le texte
+        customFont.setPointSize(24);
+
+        // Place le texte en haut au milieu de l'écran
+        m_pDisplayedLevelInformation->setX((m_pScene->width() - m_pDisplayedLevelInformation->boundingRect().width()) / 2);
+
+        // Applique la police mise à jour
+        m_pDisplayedLevelInformation->setFont(customFont);
+    } else {
+        // Mettre à jour le texte existant avec la nouvelle police
+        m_pDisplayedLevelInformation->setText(message);
+
+        // Agrandit le texte
+        customFont.setPointSize(30);
+
+        // Applique la police mise à jour
+        m_pDisplayedLevelInformation->setFont(customFont);
+    }
+}
+
+void GameCore::displayItemsInformation() {
+    // Charger la police personnalisée (police du jeu de base Zelda (NES))
+    int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
+    QString ZeldaFont = QFontDatabase::applicationFontFamilies(id).at(0);
+
+    // Créer la police personnalisée
+    QFont customFont(ZeldaFont);
+
+    // Affichage du message en gras avec la police personnalisée.
+    m_pDisplayedtextHeart = m_pScene->createText(QPointF(0, 0), "Heart : gives to player an extra hearth", 50, Qt::white);
+    m_pDisplayedtextBlueRing = m_pScene->createText(QPointF(0, 0), "Blue Ring : increases swords speed for a short time.", 50, Qt::white);
+    m_pDisplayedtextTriforce = m_pScene->createText(QPointF(0, 0), "Triforce : causes all enemies in the wave to lose one hp", 50, Qt::white);
+
+    // Agrandit le texte
+    customFont.setPointSize(16);
+
+    // Crée un Coeur
+    Sprite* pHeart = new Sprite(GameFramework::imagesPath() + "JeuZelda/HearthOnGround1.gif");
+    pHeart->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/HearthOnGround1.gif");
+    pHeart->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/HearthOnGround2.gif");
+    pHeart->setAnimationSpeed(200);
+    pHeart->startAnimation();
+    m_pScene->addSpriteToScene(pHeart);
+    pHeart->setScale(ITEM_DROP_SCALE_FACTOR);
+    pHeart->setPos(100, 300);
+    m_pHeart = pHeart;
+
+    // Place le texte juste a droite du coeur a la même hauteur
+    m_pDisplayedtextHeart->setX(pHeart->x() + pHeart->boundingRect().width() + 40);
+    m_pDisplayedtextHeart->setY(pHeart->y());
+
+    // Applique la police mise à jour
+    m_pDisplayedtextHeart->setFont(customFont);
+
+    // Crée un Blue Ring
+    Sprite* pBlueRing = new Sprite(GameFramework::imagesPath() + "JeuZelda/BlueRing.png");
+    pBlueRing->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/BlueRing.png");
+    pBlueRing->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/RedRing.png");
+    pBlueRing->setAnimationSpeed(200);
+    pBlueRing->startAnimation();
+    m_pScene->addSpriteToScene(pBlueRing);
+    pBlueRing->setScale(ITEM_DROP_SCALE_FACTOR);
+    pBlueRing->setPos(100, 350);
+    m_pBlueRing = pBlueRing;
+
+    // Place le texte juste a droite du coeur a la même hauteur
+    m_pDisplayedtextBlueRing->setX(pBlueRing->x() + pBlueRing->boundingRect().width() + 40);
+    m_pDisplayedtextBlueRing->setY(pBlueRing->y());
+
+    // Applique la police mise à jour
+    m_pDisplayedtextBlueRing->setFont(customFont);
+
+    // Crée une triforce
+    Sprite* pTriforce = new Sprite(GameFramework::imagesPath() + "JeuZelda/Triforce1.gif");
+    pTriforce->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Triforce1.gif");
+    pTriforce->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Triforce2.gif");
+    pTriforce->setAnimationSpeed(200);
+    pTriforce->startAnimation();
+    m_pScene->addSpriteToScene(pTriforce);
+    pTriforce->setScale(ITEM_DROP_SCALE_FACTOR);
+    pTriforce->setPos(100, 400);
+    m_pTriforce = pTriforce;
+
+    // Place le texte juste a droite de la tiforce a la même hauteur
+    m_pDisplayedtextTriforce->setX(pTriforce->x() + pTriforce->boundingRect().width() + 40);
+    m_pDisplayedtextTriforce->setY(pTriforce->y());
+
+    // Applique la police mise à jour
+    m_pDisplayedtextTriforce->setFont(customFont);
+}
+
+
+void GameCore::displayEnnemyInformation() {
+    // Charger la police personnalisée (police du jeu de base Zelda (NES))
+    int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
+    QString ZeldaFont = QFontDatabase::applicationFontFamilies(id).at(0);
+
+    // Créer la police personnalisée
+    QFont customFont(ZeldaFont);
+
+    // Affichage du message en gras avec la police personnalisée.
+    m_pDisplayedtextLeever = m_pScene->createText(QPointF(0, 0), "Leever", 50, Qt::white);
+    m_pDisplayedtextLeeverRouge = m_pScene->createText(QPointF(0, 0), "Red Leever", 50, Qt::white);
+    m_pDisplayedtextOctopus = m_pScene->createText(QPointF(0, 0), "Octorock", 50, Qt::white);
+
+    // Agrandit le texte
+    customFont.setPointSize(16);
+
+    // Crée un Sprite reprsentant un ennemi Leever
+    Sprite* pLeever = new Sprite(GameFramework::imagesPath() + "JeuZelda/Ennemi1_1.gif");
+    pLeever->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Ennemi1_1.gif");
+    pLeever->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Ennemi1_2.gif");
+    pLeever->setAnimationSpeed(200);
+    pLeever->startAnimation();
+    m_pScene->addSpriteToScene(pLeever);
+    pLeever->setScale(START_ENNEMY_SCALE_FACTOR);
+    pLeever->setData(SPRITE_TYPE_KEY, SpriteType::ENNEMI);
+    pLeever->setPos(100, 500);
+    m_pLeever = pLeever;
+
+    // Place le texte juste a droite de l'ennemi a la même hauteur
+    m_pDisplayedtextLeever->setX(pLeever->x() + pLeever->boundingRect().width() + 40);
+    m_pDisplayedtextLeever->setY(pLeever->y());
+
+    // Applique la police mise à jour
+    m_pDisplayedtextLeever->setFont(customFont);
+
+    // Crée un Sprite représentant un ennemi Leever Rouge
+    Sprite* pLeeverRouge = new Sprite(GameFramework::imagesPath() + "JeuZelda/Ennemi2_1.gif");
+    pLeeverRouge->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Ennemi2_1.gif");
+    pLeeverRouge->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Ennemi2_2.gif");
+    pLeeverRouge->setAnimationSpeed(200);
+    pLeeverRouge->startAnimation();
+    m_pScene->addSpriteToScene(pLeeverRouge);
+    pLeeverRouge->setScale(START_ENNEMY_SCALE_FACTOR);
+    pLeeverRouge->setData(SPRITE_TYPE_KEY, SpriteType::ENNEMI);
+    pLeeverRouge->setPos(100, 560);
+    m_pLeeverRouge = pLeeverRouge;
+
+    // Place le texte juste a droite de l'ennemi a la même hauteur
+    m_pDisplayedtextLeeverRouge->setX(pLeeverRouge->x() + pLeeverRouge->boundingRect().width() + 40);
+    m_pDisplayedtextLeeverRouge->setY(pLeeverRouge->y());
+
+    // Applique la police mise à jour
+    m_pDisplayedtextLeeverRouge->setFont(customFont);
+
+    // Crée une Sprite représentant un ennemi Octopus
+    Sprite* pOctopus = new Sprite(GameFramework::imagesPath() + "JeuZelda/EnnemiOctopus_1.gif");
+    pOctopus->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/EnnemiOctopus_1.gif");
+    pOctopus->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/EnnemiOctopus_2.gif");
+    pOctopus->setAnimationSpeed(200);
+    pOctopus->startAnimation();
+    m_pScene->addSpriteToScene(pOctopus);
+    pOctopus->setData(SPRITE_TYPE_KEY, SpriteType::ENNEMI);
+    pOctopus->setScale(START_ENNEMY_SCALE_FACTOR);
+    pOctopus->setPos(100, 620);
+    m_pOctopus = pOctopus;
+
+    // Place le texte juste a droite de l'ennemi a la même hauteur
+    m_pDisplayedtextOctopus->setX(pOctopus->x() + pOctopus->boundingRect().width() + 40);
+    m_pDisplayedtextOctopus->setY(pOctopus->y());
+
+    // Applique la police mise à jour
+    m_pDisplayedtextOctopus->setFont(customFont);
+}
+
 //! Efface le message affiché.
 //! Si aucun message n'est affiché, cette fonction ne fait rien.
-void GameCore::clearInformation() {
+void GameCore::clearDisplayInformation() {
     if (m_pDisplayedInformation != nullptr) {
         delete m_pDisplayedInformation;
         m_pDisplayedInformation = nullptr;
+    }
+}
+
+void GameCore::clearLevelInformation() {
+    if (m_pDisplayedLevelInformation != nullptr) {
+        delete m_pDisplayedLevelInformation;
+        m_pDisplayedLevelInformation = nullptr;
+    }
+}
+
+void GameCore::clearWavesInformation() {
+    if (m_pDisplayedNumberWaves != nullptr) {
+        delete m_pDisplayedNumberWaves;
+        m_pDisplayedNumberWaves = nullptr;
+    }
+}
+
+void GameCore::clearItemsInformation() {
+    if (m_pDisplayedtextHeart != nullptr) {
+        delete m_pDisplayedtextHeart;
+        m_pDisplayedtextHeart = nullptr;
+    }
+    if (m_pDisplayedtextBlueRing != nullptr) {
+        delete m_pDisplayedtextBlueRing;
+        m_pDisplayedtextBlueRing = nullptr;
+    }
+    if (m_pDisplayedtextTriforce != nullptr) {
+        delete m_pDisplayedtextTriforce;
+        m_pDisplayedtextTriforce = nullptr;
+    }
+    if(m_pHeart != nullptr) {
+        m_pScene->removeSpriteFromScene(m_pHeart);
+        delete m_pHeart;
+        m_pHeart = nullptr;
+    }
+    if(m_pBlueRing != nullptr) {
+        m_pScene->removeSpriteFromScene(m_pBlueRing);
+        delete m_pBlueRing;
+        m_pBlueRing = nullptr;
+    }
+    if(m_pTriforce != nullptr) {
+        m_pScene->removeSpriteFromScene(m_pTriforce);
+        delete m_pTriforce;
+        m_pTriforce = nullptr;
+    }
+}
+
+void GameCore::clearEnnemyInformation() {
+    if (m_pDisplayedtextLeever != nullptr) {
+        delete m_pDisplayedtextLeever;
+        m_pDisplayedtextLeever = nullptr;
+    }
+    if (m_pDisplayedtextLeeverRouge != nullptr) {
+        delete m_pDisplayedtextLeeverRouge;
+        m_pDisplayedtextLeeverRouge = nullptr;
+    }
+    if (m_pDisplayedtextOctopus != nullptr) {
+        delete m_pDisplayedtextOctopus;
+        m_pDisplayedtextOctopus = nullptr;
+    }
+    if(m_pLeever != nullptr) {
+        m_pScene->removeSpriteFromScene(m_pLeever);
+        delete m_pLeever;
+        m_pLeever = nullptr;
+    }
+    if(m_pLeeverRouge != nullptr) {
+        m_pScene->removeSpriteFromScene(m_pLeeverRouge);
+        delete m_pLeeverRouge;
+        m_pLeeverRouge = nullptr;
+    }
+    if(m_pOctopus != nullptr) {
+        m_pScene->removeSpriteFromScene(m_pOctopus);
+        delete m_pOctopus;
+        m_pOctopus = nullptr;
+    }
+}
+
+void GameCore::removeSpriteByType(int spriteType) {
+    auto children = m_pScene->items();
+    for(auto child : children) {
+        if(Sprite* sprite = dynamic_cast<Sprite*>(child)) {
+            if(sprite->data(SPRITE_TYPE_KEY).toInt() == spriteType) {
+                m_pScene->removeSpriteFromScene(sprite);
+                delete sprite;
+            }
+        }
     }
 }
 
@@ -588,47 +903,11 @@ void GameCore::restartGame() {
         }
     }
 
-    // supprime tous les coeur au sol
-    auto children2 = m_pScene->items();
-    for(auto child: children2) {
-        if (Sprite* sprite = dynamic_cast<Sprite*>(child)) {
-            if(sprite->data(SPRITE_TYPE_KEY).toInt() == HEARTDROP) {
-                m_pScene->removeSpriteFromScene(sprite);
-                delete sprite;
-            }
-        }
-    }
-
-    // supprime tous les Blue Ring au sol
-    auto children3 = m_pScene->items();
-    for(auto child: children3) {
-        if (Sprite* sprite = dynamic_cast<Sprite*>(child)) {
-            if(sprite->data(SPRITE_TYPE_KEY).toInt() == BLUE_RING) {
-                m_pScene->removeSpriteFromScene(sprite);
-                delete sprite;
-            }
-        }
-    }
-
-    // supprime toutes les Triforce au sol
-    auto children4 = m_pScene->items();
-    for(auto child: children4) {
-        if (Sprite* sprite = dynamic_cast<Sprite*>(child)) {
-            if(sprite->data(SPRITE_TYPE_KEY).toInt() == TRIFORCE) {
-                m_pScene->removeSpriteFromScene(sprite);
-                delete sprite;
-            }
-        }
-    }
-
-    // supprime tous les décors
-    auto children5 = m_pScene->items();
-    for(auto child: children5) {
-        if (Decor* decor = dynamic_cast<Decor*>(child)) {
-            m_pScene->removeSpriteFromScene(decor);
-            delete decor;
-        }
-    }
+    removeSpriteByType(HEARTDROP);
+    removeSpriteByType(BLUE_RING);
+    removeSpriteByType(TRIFORCE);
+    removeSpriteByType(DECOR);
+    removeSpriteByType(FIRE);
 
     // remet le fond en noir
     m_pScene->setBackgroundColor(QColor(0, 0, 0));
@@ -646,14 +925,30 @@ void GameCore::restartGame() {
     m_pPlayer->setScale(PLAYER_SCALE_FACTOR);
     m_pPlayer->setPos(m_pScene->width()/2.0, m_pScene->height()/2.0);
 
-    // Supprime l'épée du joueursi elle est encore présente au moment du Game Over
+    // Supprime l'épée du joueur si elle est encore présente au moment du Game Over
     m_pPlayer->removeSword();
 
-    // Réinitialise le mode de jeu
+    // Réinitialise le mode de jeu à START
     m_gameMode = START;
 
     // Efface le texte affiché
-    clearInformation();
+    clearDisplayInformation();
+
+    // Efface le texte des vagues
+    clearWavesInformation();
+
+    // Affiche les levels et le titre du jeu au joueur
+    displayLevelInformation("THE LEGEND OF ZELDA FIGHTER \n"
+                            "\n"
+                            "    1 - Field of Hyrule \n"
+                            "    2 - Riverside \n"
+                            "    3 - Death Mountain \n");
+
+    // Affiche les items et leurs descriptions au joueur
+    displayItemsInformation();
+
+    // Affiche les ennemis et leurs descriptions au joueur
+    displayEnnemyInformation();
 
     // Redémarre le tick arrêté au moment du Game Over
     m_pGameCanvas->startTick();

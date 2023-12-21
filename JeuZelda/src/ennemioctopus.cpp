@@ -54,7 +54,7 @@ void EnnemiOctopus::tick(long long elapsedTimeInMilliseconds) {
 void EnnemiOctopus::attack(QPointF direction) {
     if(m_pProjectil = nullptr)
         return;
-    m_pProjectil = new Projectile(300, direction, GameFramework::imagesPath() + "JeuZelda/RockProjectil.png", this);
+    m_pProjectil = new Projectile(350, direction, GameFramework::imagesPath() + "JeuZelda/RockProjectil.png", this);
     m_pProjectil->setScale(2);
     m_pProjectil->setPos(pos());
     // m_pSword->setOffset(sceneBoundingRect().width() / -2.0, sceneBoundingRect().height() / -2.0);

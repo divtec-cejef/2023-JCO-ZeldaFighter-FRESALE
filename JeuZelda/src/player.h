@@ -31,7 +31,7 @@ public:
     static constexpr float SWORD_SCALE_FACTOR = 4.0;
 
 private:
-    static constexpr int ESPACE_ENTRE_COEURS = 55;
+    static constexpr int ESPACE_ENTRE_COEURS = 60;
     static constexpr int NOMBRES_COEURS = 3;
 
 

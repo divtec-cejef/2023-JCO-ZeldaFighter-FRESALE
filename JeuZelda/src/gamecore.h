@@ -75,9 +75,17 @@ public:
 
     void displayInformation(const QString& rMessage);
     void displayWaves(int waveNumber);
+    void displayLevelInformation(const QString& rMessage);
+    void displayItemsInformation();
+    void displayEnnemyInformation();
+    void removeSpriteByType(int spriteType);
     void restartGame();
     void removeItemsByType(int spriteType);
-    void clearInformation();
+    void clearDisplayInformation();
+    void clearLevelInformation();
+    void clearWavesInformation();
+    void clearItemsInformation();
+    void clearEnnemyInformation();
 
     GameMode m_gameMode = RUNNING;
 
@@ -86,6 +94,7 @@ public:
     static constexpr float DECOR_SCALE_FACTOR = 5;
     static constexpr float WATER_SCALE_FACTOR = 4;
     static constexpr float ITEM_DROP_SCALE_FACTOR = 3.8;
+    static constexpr float START_ENNEMY_SCALE_FACTOR = 3.2;
     static constexpr int MAX_HEARTH = 5;
 
 signals:
@@ -123,6 +132,19 @@ private:
     bool hasDAnimationPlayed = false;
     QGraphicsSimpleTextItem* m_pDisplayedInformation;
     QGraphicsSimpleTextItem* m_pDisplayedNumberWaves;
+    QGraphicsSimpleTextItem* m_pDisplayedLevelInformation;
+    QGraphicsSimpleTextItem* m_pDisplayedtextHeart;
+    QGraphicsSimpleTextItem* m_pDisplayedtextBlueRing;
+    QGraphicsSimpleTextItem* m_pDisplayedtextTriforce;
+    QGraphicsSimpleTextItem* m_pDisplayedtextLeever;
+    QGraphicsSimpleTextItem* m_pDisplayedtextLeeverRouge;
+    QGraphicsSimpleTextItem* m_pDisplayedtextOctopus;
+    Sprite* m_pHeart = nullptr;
+    Sprite* m_pBlueRing = nullptr;
+    Sprite* m_pTriforce = nullptr;
+    Sprite* m_pLeever = nullptr;
+    Sprite* m_pLeeverRouge = nullptr;
+    Sprite* m_pOctopus = nullptr;
     QList<int> m_pressedKeys;
 
 private slots:
