@@ -16,11 +16,8 @@ public:
     void tick(int elapsedMs);
     void damage();
     void addHeart();
-    void displayInformation(const QString& rMessage);
     void attack(QPointF direction);
     void removeSword();
-    void updatePlayer();
-    void blinkRed();
     bool isDead = false;
     float swordSpeed = 550.0;
     Projectile* m_pSword = nullptr;

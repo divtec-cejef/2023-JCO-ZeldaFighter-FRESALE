@@ -64,8 +64,8 @@ void EnnemiOctopus::attack(QPointF direction) {
 void EnnemiOctopus::damage() {
     m_Hp--;
     if(m_Hp <= 0) {
-        CreateCloudOndeath(pos());
-        ChanceToSpawnItems(pos(), CHANCE_TO_SPAWN_HEART, CHANCE_TO_SPAWN_BLUE_RING, CHANCE_TO_SPAWN_TRIFORCE);
+        createCloudOnDeath(pos());
+        createItemOnDeath(pos(), CHANCE_TO_SPAWN_HEART, CHANCE_TO_SPAWN_BLUE_RING, CHANCE_TO_SPAWN_TRIFORCE);
         removeEnnemyFromScene();
         removeProjectile();
     }

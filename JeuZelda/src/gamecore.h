@@ -32,7 +32,6 @@ public:
     enum SpriteType {
         DECOR,
         PLAYER,
-        WATER,
         HEART,
         ENNEMI,
         FIRE,
@@ -43,10 +42,10 @@ public:
     };
 
     enum GameMode {
+        START,
         RUNNING,
         PAUSE,
-        ENDED_LOSE,
-        START
+        ENDED_LOSE
     };
 
     enum SpriteDataKey {
@@ -65,7 +64,6 @@ public:
 
     void tick(long long elapsedTimeInMilliseconds);
     void updatePlayer();
-    void ThrowSword();
     void restorePlayerOpacity();
 
     int countEnnemies();
@@ -127,10 +125,6 @@ private:
     bool isAKeyPressed = false;
     bool isSKeyPressed = false;
     bool isDKeyPressed = false;
-    bool hasWAnimationPlayed = false;
-    bool hasAAnimationPlayed = false;
-    bool hasSAnimationPlayed = false;
-    bool hasDAnimationPlayed = false;
     QGraphicsSimpleTextItem* m_pDisplayedInformation;
     QGraphicsSimpleTextItem* m_pDisplayedNumberWaves;
     QGraphicsSimpleTextItem* m_pDisplayedLevelInformation;

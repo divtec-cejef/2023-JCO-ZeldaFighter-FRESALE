@@ -10,7 +10,9 @@ Ennemy::Ennemy(QString imagePath) : Sprite(imagePath)
     setData(GameCore::SpriteDataKey::SPRITE_TYPE_KEY, GameCore::ENNEMI);
 }
 
-void Ennemy::CreateCloudOndeath(QPointF pos) {
+//! Fonction qui permet de créer un nuage quand l'ennemi meurt
+//! //! \param pos La position de l'ennemi
+void Ennemy::createCloudOnDeath(QPointF pos) {
     Sprite* pCloud = new Sprite();
     // Ajoute les images du nuage.
     for(int index = 1; index <= 7; index++) {
@@ -22,6 +24,7 @@ void Ennemy::CreateCloudOndeath(QPointF pos) {
     pCloud->setScale(CLOUD_SCALE_FACTOR);
     pCloud->setPos(pos);
     pCloud->setEmitSignalEndOfAnimationEnabled(true);
+    // Supprime le nuage quand l'animation est terminée.
     connect(pCloud, &Sprite::animationFinished, pCloud, &Sprite::deleteLater);
 
     // Ajoute le nuage à la scène et démarre son animation.
@@ -31,11 +34,13 @@ void Ennemy::CreateCloudOndeath(QPointF pos) {
 }
 
 
-void Ennemy::ChanceToSpawnItems(QPointF pos, int chanceToSpawnHearth, int chanceToSpawnBlueRing, int chanceToSpawnTriForce) {
+void Ennemy::createItemOnDeath(QPointF pos, int chanceToSpawnHearth, int chanceToSpawnBlueRing, int chanceToSpawnTriForce) {
     // quand l'ennemi meurt, il y a une chance sur chanceToSpawn qu'il drop un coeur
     int randomChanceToSpawnHeart = QRandomGenerator::global()->bounded(0, chanceToSpawnHearth);
     int randomChanceToSpawnBlueRing = QRandomGenerator::global()->bounded(0, chanceToSpawnBlueRing);
     int randomChanceToSpawnTriForce = QRandomGenerator::global()->bounded(0, chanceToSpawnTriForce);
+
+    // Si le random est égal à 0, on ajoute un coeur à la scène
     if (randomChanceToSpawnHeart == 0) {
         Sprite* pHeart = new Sprite(GameFramework::imagesPath() + "JeuZelda/HearthOnGround1.gif");
         pHeart->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/HearthOnGround1.gif");
@@ -59,6 +64,7 @@ void Ennemy::ChanceToSpawnItems(QPointF pos, int chanceToSpawnHearth, int chance
         });
     }
 
+    // Si le random est égal à 0, on ajoute un blue ring à la scène
     if(randomChanceToSpawnBlueRing == 0) {
         Sprite* pBlueRing = new Sprite(GameFramework::imagesPath() + "JeuZelda/BlueRing.png");
         pBlueRing->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/BlueRing.png");
@@ -83,6 +89,7 @@ void Ennemy::ChanceToSpawnItems(QPointF pos, int chanceToSpawnHearth, int chance
         });
     }
 
+    // Si le random est égal à 0, on ajoute une triforce à la scène
     if(randomChanceToSpawnTriForce == 0) {
         Sprite* pTriForce = new Sprite(GameFramework::imagesPath() + "JeuZelda/Triforce1.gif");
         pTriForce->addAnimationFrame(GameFramework::imagesPath() + "JeuZelda/Triforce1.gif");
@@ -108,6 +115,7 @@ void Ennemy::ChanceToSpawnItems(QPointF pos, int chanceToSpawnHearth, int chance
     }
 }
 
+//! Supprime l'ennemi de la scene
 void Ennemy::removeEnnemyFromScene() {
     parentScene()->removeSpriteFromScene(this);
     delete(this);

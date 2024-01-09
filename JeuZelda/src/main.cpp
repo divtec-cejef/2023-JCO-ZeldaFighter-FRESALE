@@ -194,6 +194,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("divtec.ch");
     QCoreApplication::setApplicationName("2023-JCO-ZeldaFighter-FRESALE");
     QGuiApplication::setApplicationDisplayName("2023-JCO-ZeldaFighter-FRESALE");
+    QGuiApplication::setWindowIcon(QIcon(GameFramework::imagesPath() + "JeuZelda/Triforce1.gif"));
 
     qDebug() << "App dir path : " << qApp->applicationDirPath();
     qDebug() << "App library paths : " << qApp->libraryPaths();

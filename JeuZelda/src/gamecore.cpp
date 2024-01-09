@@ -7,7 +7,6 @@
 #include "gamecore.h"
 
 #include <cmath>
-
 #include <QDebug>
 #include <QSettings>
 #include <QMovie>
@@ -19,8 +18,8 @@
 #include "utilities.h"
 #include "sprite.h"
 #include "player.h"
-#include "EnnemiLeever.h"
 #include "ennemifactory.h"
+#include "EnnemiLeever.h"
 #include "ennemileeverrouge.h"
 #include "ennemioctopus.h"
 #include "decor.h"
@@ -42,10 +41,6 @@ GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent)
     // Trace un rectangle blanc tout autour des limites de la scène.
     m_pScene->addRect(m_pScene->sceneRect(), QPen(Qt::white));
 
-    // Création des ennemis grâce à la classe EnnemiFactory
-    // EnnemiFactory* ennemifactory = new EnnemiFactory(m_pScene);
-    // ennemifactory->createWave(25,0,0);
-
     // Crée un nouveau joueur
     m_pPlayer = new Player();
     m_pScene->addSpriteToScene(m_pPlayer);
@@ -57,6 +52,10 @@ GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent)
 
     // Rend le joueur invisible au début du jeu
     m_pPlayer->setVisible(false);
+
+    // Création des ennemis grâce à la classe EnnemiFactory
+    // EnnemiFactory* ennemifactory = new EnnemiFactory(m_pScene, m_pPlayer);
+    // ennemifactory->createWave(20,20,20);
 
     // Démarre le tick pour que les animations qui en dépendent fonctionnent correctement.
     // Attention : il est important que l'enclenchement du tick soit fait vers la fin de cette fonction,
@@ -258,34 +257,18 @@ void GameCore::keyPressed(int key) {
         break;
     case Qt::Key_W:
         isWKeyPressed = true;
-        if(!hasWAnimationPlayed) {
-            m_playerSpeed = 0;
-            hasWAnimationPlayed = true;
-        }
         break;
 
     case Qt::Key_A:
         isAKeyPressed = true;
-        if(!hasAAnimationPlayed) {
-            m_playerSpeed = 0;
-            hasAAnimationPlayed = true;
-        }
         break;
 
     case Qt::Key_S:
         isSKeyPressed = true;
-        if(!hasSAnimationPlayed) {
-            m_playerSpeed = 0;
-            hasSAnimationPlayed = true;
-        }
         break;
 
     case Qt::Key_D:
         isDKeyPressed = true;
-        if(!hasDAnimationPlayed) {
-            m_playerSpeed = 0;
-            hasDAnimationPlayed = true;
-        }
         break;
     default:
         //
@@ -300,20 +283,20 @@ void GameCore::keyReleased(int key) {
     if(key == Qt::Key_Space) {
         switch (m_gameMode) {
         case RUNNING :
+            // on presse sur space, le jeu se met en pause
             if(m_pGameCanvas->isTicking()) {
                 m_pGameCanvas->stopTick();
                 m_gameMode = PAUSE;
                 qDebug() << "Jeu en pause";
                 displayInformation("Presse space to continue \n"
                                    "Presse escape to restart");
-            } else {
-                clearDisplayInformation();
-                m_pGameCanvas->startTick();
             }
             break;
         case PAUSE:
+            // on presse sur space, le jeu reprend
             m_gameMode = RUNNING;
             clearDisplayInformation();
+            m_pGameCanvas->startTick();
             break;
         case ENDED_LOSE:
             restartGame();
@@ -350,57 +333,48 @@ void GameCore::keyReleased(int key) {
         break;
     case Qt::Key_W:
         isWKeyPressed = false;
-        m_pPlayer->stopAnimation();
-        m_pPlayer->clearAnimations();
         break;
     case Qt::Key_A:
         isAKeyPressed = false;
-        m_pPlayer->stopAnimation();
-        m_pPlayer->clearAnimations();
-        hasAAnimationPlayed = false;
         break;
     case Qt::Key_S:
         isSKeyPressed = false;
-        m_pPlayer->stopAnimation();
-        m_pPlayer->clearAnimations();
-        hasSAnimationPlayed = false;
         break;
     case Qt::Key_D:
         isDKeyPressed = false;
-        m_pPlayer->stopAnimation();
-        m_pPlayer->clearAnimations();
-        hasDAnimationPlayed = false;
         break;
     default:
-        //
+        // default
         break;
     }
 }
 
+
+//! \param elapsedTimeInMilliseconds Le temps écoulé depuis le dernier appel à cette fonction.
+//! Cette fonction est appelée à chaque tick du jeu.
 void GameCore::tick(long long elapsedTimeInMilliseconds) {
     m_pPlayer->tick(static_cast<int>(elapsedTimeInMilliseconds));
 
     auto children = m_pScene->items();
 
+    // Boucle qui permet de faire bouger les ennemies grâce au tick
     for(auto child: children) {
         if (Ennemy* ennemi = dynamic_cast<Ennemy*>(child)) {
             ennemi->tick(elapsedTimeInMilliseconds);
         }
     }
-
-    if(m_pPlayer->m_pHearts.length() == 1) {
-        m_pPlayer->blinkRed();
-    }
-
+    // Appel de la fonction qui compte le nombre d'ennemi encore en vie sur la scène
     countEnnemies();
+    // Appel de la fonction qui génère une nouvelle vague d'ennemis si aucun ennemi n'est présent sur la scène
     generateEnemyWave();
-    // updatePlayer();
 
     // Si le joueur est en train de jouer, on efface les informations de l'écran de début
     if(m_gameMode == RUNNING) {
         // Rend le joueur visible au lancement de la partie
         m_pPlayer->setVisible(true);
+        // Permet au joueur de se déplacer
         updatePlayer();
+        // clear toutes les informations du menu principal
         clearLevelInformation();
         clearItemsInformation();
         clearEnnemyInformation();
@@ -411,7 +385,6 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
     }
 
     QList<Sprite*> collisions = m_pScene->collidingSprites(m_pPlayer);
-    bool isInWater = false;
     bool isCollidingWithDecor = false;
 
     if (!collisions.isEmpty()) {
@@ -444,8 +417,6 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
                     m_pPlayer->setY(m_pPlayer->y() + m_playerSpeed);
                 }
             }
-        } else if (pCollisionned->data(SPRITE_TYPE_KEY).toInt() == WATER) {
-            isInWater = true;
         } else if (pCollisionned->data(SPRITE_TYPE_KEY).toInt() == ENNEMI || pCollisionned->data(SPRITE_TYPE_KEY).toInt() == FIRE) {
             // Le joueur prend des dégâts
             m_pPlayer->damage();
@@ -469,11 +440,12 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
         } else if(pCollisionned->data(SPRITE_TYPE_KEY).toInt() == BLUE_RING) {
             // Le projectile (épée) du joueur va 2 fois plus vite pendant 5 secondes
             qDebug() << "Blue Ring touché";
-
+            // Si le joueur n'a pas déjà l'effet d'un Blue Ring, alors il gagne l'effet
                 if(m_pPlayer->swordSpeed == 550.0) {
                 m_pPlayer->swordSpeed = 1000.0;
             }
 
+            // Après 5 secondes, la vitesse de l'épée du joueur revient à la normale
             QTimer::singleShot(5000, m_pPlayer, [this]() {
                 m_pPlayer->swordSpeed = 550.0;
             });
@@ -491,14 +463,6 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
             // supprime la triforce de la scène une fois que le joueur l'a touchée
             m_pScene->removeSpriteFromScene(pCollisionned);
             delete pCollisionned;
-        }
-    }
-
-    if (!isCollidingWithDecor) {
-        if (isInWater) {
-            m_playerSpeed = 5;
-        } else {
-            m_playerSpeed = 10;
         }
     }
 }
@@ -545,10 +509,12 @@ void GameCore::generateEnemyWave() {
                     nbreEnnemiLeever++;
                 }
             }
+            // Créer la vague d'ennemis
             ennemiFactory->createWave(nbreEnnemiLeever, nbreEnnemiLeeverRouge, nbreEnnemiOctopus);
 
             // Afficher le numéro de la vague
             displayWaves(m_currentWave);
+
             // Incrémenter le numéro de vague actuel
             m_currentWave++;
             delete ennemiFactory;
@@ -582,6 +548,9 @@ void GameCore::displayInformation(const QString& rMessage) {
     m_pDisplayedInformation = pText;
 }
 
+//! \brief GameCore::displayWaves
+//! \param waveNumber Le numéro de la vague actuel
+//! Affiche le numéro de la vague actuel
 void GameCore::displayWaves(int waveNumber) {
     // Construire le message avec le numéro de la vague
     QString message = "Wave " + QString::number(waveNumber);
@@ -618,6 +587,8 @@ void GameCore::displayWaves(int waveNumber) {
     }
 }
 
+//! \brief GameCore::displayLevelInformation
+//! Affiche les levels et le titre du jeu
 void GameCore::displayLevelInformation() {
     // Charger la police personnalisée (police du jeu de base Zelda (NES))
     int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
@@ -652,6 +623,8 @@ void GameCore::displayLevelInformation() {
     }
 }
 
+//! \brief GameCore::displayItemsInformation
+//! Affiche les items et leur utilité
 void GameCore::displayItemsInformation() {
     // Charger la police personnalisée (police du jeu de base Zelda (NES))
     int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
@@ -723,7 +696,8 @@ void GameCore::displayItemsInformation() {
     m_pDisplayedtextTriforce->setFont(customFont);
 }
 
-
+//! \brief GameCore::displayEnnemyInformation
+//! Affiche les ennemis et leur nom
 void GameCore::displayEnnemyInformation() {
     // Charger la police personnalisée (police du jeu de base Zelda (NES))
     int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
@@ -790,7 +764,7 @@ void GameCore::displayEnnemyInformation() {
     pOctopus->setPos(100, 620);
     m_pOctopus = pOctopus;
 
-    // Place le texte juste a droite de l'ennemi a la même hauteur
+    // Place le texte juste à droite de l'ennemi a la même hauteur
     m_pDisplayedtextOctopus->setX(pOctopus->x() + pOctopus->boundingRect().width() + 40);
     m_pDisplayedtextOctopus->setY(pOctopus->y());
 
@@ -798,6 +772,9 @@ void GameCore::displayEnnemyInformation() {
     m_pDisplayedtextOctopus->setFont(customFont);
 }
 
+//! \brief GameCore::displayBestScore
+//! Affiche le meilleur score
+//! Le meilleur score correspond à la vague maximum atteint par le joueur.
 void GameCore::displayBestScore() {
     // Charger la police personnalisée (police du jeu de base Zelda (NES))
     int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
@@ -828,6 +805,7 @@ void GameCore::clearDisplayInformation() {
     }
 }
 
+//! Efface le numéro de la vague affiché.
 void GameCore::clearLevelInformation() {
     if (m_pDisplayedLevelInformation != nullptr) {
         delete m_pDisplayedLevelInformation;
@@ -835,6 +813,7 @@ void GameCore::clearLevelInformation() {
     }
 }
 
+//! Efface le numéro de la vague affiché.
 void GameCore::clearWavesInformation() {
     if (m_pDisplayedNumberWaves != nullptr) {
         delete m_pDisplayedNumberWaves;
@@ -842,6 +821,7 @@ void GameCore::clearWavesInformation() {
     }
 }
 
+//! Efface les informations sur les items affichées.
 void GameCore::clearItemsInformation() {
     if (m_pDisplayedtextHeart != nullptr) {
         delete m_pDisplayedtextHeart;
@@ -872,6 +852,7 @@ void GameCore::clearItemsInformation() {
     }
 }
 
+//! Efface les informations sur les ennemis affichées.
 void GameCore::clearEnnemyInformation() {
     if (m_pDisplayedtextLeever != nullptr) {
         delete m_pDisplayedtextLeever;
@@ -902,6 +883,7 @@ void GameCore::clearEnnemyInformation() {
     }
 }
 
+//! Efface le meilleur score affiché.
 void GameCore::clearBestScoreInformation() {
     if (m_pDisplayedBestScore != nullptr) {
         delete m_pDisplayedBestScore;
@@ -909,6 +891,9 @@ void GameCore::clearBestScoreInformation() {
     }
 }
 
+//! \brief GameCore::removeSpriteByType
+//! \param spriteType Type du sprite à supprimer
+//! Supprime un sprite de la scène en fonction de son type
 void GameCore::removeSpriteByType(int spriteType) {
     auto children = m_pScene->items();
     for(auto child : children) {
@@ -921,6 +906,9 @@ void GameCore::removeSpriteByType(int spriteType) {
     }
 }
 
+//!
+//! \brief GameCore::restartGame
+//! Réinitialise le jeu
 void GameCore::restartGame() {
     // Supprime tous les ennemi et les projectiles de la scène
     auto children = m_pScene->items();
@@ -934,6 +922,7 @@ void GameCore::restartGame() {
         }
     }
 
+    // Supprime tous les items de la scène par type (coeur, blue ring, triforce, décor et feu)
     removeSpriteByType(HEARTDROP);
     removeSpriteByType(BLUE_RING);
     removeSpriteByType(TRIFORCE);
@@ -1014,6 +1003,7 @@ void GameCore::updatePlayer() {
             m_pPlayer->setY(m_pPlayer->y() + m_playerSpeed);
         }
     }
+    // Oriente l'attaque du joueur en fonction de la touche appuyée (W, A, S ou D)
     if(isWKeyPressed) {
         m_pPlayer->attack(QPointF(0, -1));
     }

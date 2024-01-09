@@ -25,6 +25,7 @@ Projectile::Projectile(qreal speed, QPointF direction, const QString &rImagePath
 }
 
 void Projectile::tick(long long elapsedTimeMs) {
+    // Déplace le projectile dans la direction spécifiée.
     setPos(pos() + m_direction * m_speed * elapsedTimeMs / 1000.0);
     if(bottom() < 0 ||
         top() > parentScene()->height() ||
@@ -53,6 +54,8 @@ void Projectile::tick(long long elapsedTimeMs) {
             // Le projectile a touché un décor, on supprime le projectile.
             if(Player* player = dynamic_cast<Player*>(m_pOwner)) {
                 player->removeSword();
+            } else if(EnnemiOctopus* pEnnemy = dynamic_cast<EnnemiOctopus*>(m_pOwner)) {
+                pEnnemy->removeProjectile();
             }
         } else if(pCollisionned->data(GameCore::SPRITE_TYPE_KEY) == GameCore::PLAYER && m_pOwner->data(GameCore::SPRITE_TYPE_KEY) == GameCore::ENNEMI) {
             // Le projectile a touché le joueur, on utilise la fonction damage du joueur.
@@ -61,7 +64,7 @@ void Projectile::tick(long long elapsedTimeMs) {
             if(EnnemiOctopus* pEnnemy = dynamic_cast<EnnemiOctopus*>(m_pOwner)) {
                 pEnnemy->removeProjectile();
             }
-            // si un projectil du joueur touche le projectil d'un ennemi, on supprime le projectil de l'ennemi
+            // si un projectil du joueur touche le projectil d'un ennemi, on supprime le projectil de l'ennemi et le projectil du joueur
         } else if(pCollisionned->data(GameCore::SPRITE_TYPE_KEY) == GameCore::PROJECTIL) {
             if(EnnemiOctopus* pEnnemy = dynamic_cast<EnnemiOctopus*>(m_pOwner)) {
                 pEnnemy->removeProjectile();
