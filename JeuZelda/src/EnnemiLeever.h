@@ -17,6 +17,9 @@ public:
 private:
     static constexpr float LEEVER_SCALE_FACTOR = 4;
     static constexpr int LEEVER_RANGE = 80;
+    static constexpr int CHANCE_TO_SPAWN_HEART = 9;
+    static constexpr int CHANCE_TO_SPAWN_BLUE_RING = 18;
+    static constexpr int CHANCE_TO_SPAWN_TRIFORCE = 50;
     int m_Hp = 1;
 };
 

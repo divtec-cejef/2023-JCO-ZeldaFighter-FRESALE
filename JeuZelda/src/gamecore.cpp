@@ -67,14 +67,16 @@ GameCore::GameCore(GameCanvas* pGameCanvas, QObject* pParent) : QObject(pParent)
     m_gameMode = START;
 
     // Affiche les levels et le titre du jeu au joueur
-    displayLevelInformation("THE LEGEND OF ZELDA FIGHTER \n"
-                            "\n"
-                            "    1 - Field of Hyrule \n"
-                            "    2 - Riverside \n"
-                            "    3 - Death Mountain \n");
+    displayLevelInformation();
 
+    // Affiche les items et leur utilité au joueur
     displayItemsInformation();
+
+    // Affiche les ennemis au joueur
     displayEnnemyInformation();
+
+    // Affiche le meilleur score du joueur
+    displayBestScore();
 }
 
 //! Destructeur de GameCore : efface les scènes
@@ -402,6 +404,7 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
         clearLevelInformation();
         clearItemsInformation();
         clearEnnemyInformation();
+        clearBestScoreInformation();
     } else {
         // Rend le joueur invisible s'il ne se trouve pas dans une partie (RUNNING)
         m_pPlayer->setVisible(false);
@@ -466,10 +469,13 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
         } else if(pCollisionned->data(SPRITE_TYPE_KEY).toInt() == BLUE_RING) {
             // Le projectile (épée) du joueur va 2 fois plus vite pendant 5 secondes
             qDebug() << "Blue Ring touché";
-                        m_pPlayer->swordVitesse *= 2;
+
+                if(m_pPlayer->swordSpeed == 550.0) {
+                m_pPlayer->swordSpeed = 1000.0;
+            }
 
             QTimer::singleShot(5000, m_pPlayer, [this]() {
-                m_pPlayer->swordVitesse = 550.0;
+                m_pPlayer->swordSpeed = 550.0;
             });
             // supprime le Blue Ring de la scène une fois que le joueur l'a touchée
             m_pScene->removeSpriteFromScene(pCollisionned);
@@ -489,7 +495,6 @@ void GameCore::tick(long long elapsedTimeInMilliseconds) {
     }
 
     if (!isCollidingWithDecor) {
-
         if (isInWater) {
             m_playerSpeed = 5;
         } else {
@@ -519,7 +524,7 @@ void GameCore::generateEnemyWave() {
     // Vérifier s'il y a déjà des ennemis sur la scène
     if (countEnnemies() == 0) {
         // Créer une nouvelle vague d'ennemis
-        EnnemiFactory* ennemiFactory = new EnnemiFactory(m_pScene);
+        EnnemiFactory* ennemiFactory = new EnnemiFactory(m_pScene, m_pPlayer);
 
         int nbreEnnemiLeever = 0;
         int nbreEnnemiLeeverRouge = 0;
@@ -613,10 +618,7 @@ void GameCore::displayWaves(int waveNumber) {
     }
 }
 
-void GameCore::displayLevelInformation(QString const& rMessage) {
-    // Construire le message avec le numéro de la vague
-    QString message = rMessage;
-
+void GameCore::displayLevelInformation() {
     // Charger la police personnalisée (police du jeu de base Zelda (NES))
     int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
     QString ZeldaFont = QFontDatabase::applicationFontFamilies(id).at(0);
@@ -627,7 +629,11 @@ void GameCore::displayLevelInformation(QString const& rMessage) {
     // Vérifier si le texte existe déjà, sinon le créer
     if (!m_pDisplayedLevelInformation) {
         // Affichage du message en gras avec la police personnalisée.
-        m_pDisplayedLevelInformation = m_pScene->createText(QPointF(0, 0), message, 50, Qt::white);
+        m_pDisplayedLevelInformation = m_pScene->createText(QPointF(0, 0), "THE LEGEND OF ZELDA FIGHTER \n"
+                                                                           "\n"
+                                                                           "    1 - Field of Hyrule \n"
+                                                                           "    2 - Riverside \n"
+                                                                           "    3 - Death Mountain \n", 50, Qt::white);
 
         // Agrandit le texte
         customFont.setPointSize(24);
@@ -638,9 +644,6 @@ void GameCore::displayLevelInformation(QString const& rMessage) {
         // Applique la police mise à jour
         m_pDisplayedLevelInformation->setFont(customFont);
     } else {
-        // Mettre à jour le texte existant avec la nouvelle police
-        m_pDisplayedLevelInformation->setText(message);
-
         // Agrandit le texte
         customFont.setPointSize(30);
 
@@ -795,6 +798,27 @@ void GameCore::displayEnnemyInformation() {
     m_pDisplayedtextOctopus->setFont(customFont);
 }
 
+void GameCore::displayBestScore() {
+    // Charger la police personnalisée (police du jeu de base Zelda (NES))
+    int id = QFontDatabase::addApplicationFont("C:\\Users\\fresale\\JeuZelda\\res\\fonts\\PixelEmulator-xq08.ttf");
+    QString ZeldaFont = QFontDatabase::applicationFontFamilies(id).at(0);
+
+    // Créer la police personnalisée
+    QFont customFont(ZeldaFont);
+
+    // Affichage du message en gras avec la police personnalisée.
+    m_pDisplayedBestScore = m_pScene->createText(QPointF(0, 0), "Best Score : " + QString::number(m_bestScore), 50, Qt::white);
+
+    // Agrandit le texte
+    customFont.setPointSize(16);
+
+    // Place le texte en haut à droite de l'écran
+    m_pDisplayedBestScore->setX(m_pScene->width() - m_pDisplayedBestScore->boundingRect().width() + 50);
+
+    // Applique la police mise à jour
+    m_pDisplayedBestScore->setFont(customFont);
+}
+
 //! Efface le message affiché.
 //! Si aucun message n'est affiché, cette fonction ne fait rien.
 void GameCore::clearDisplayInformation() {
@@ -878,6 +902,13 @@ void GameCore::clearEnnemyInformation() {
     }
 }
 
+void GameCore::clearBestScoreInformation() {
+    if (m_pDisplayedBestScore != nullptr) {
+        delete m_pDisplayedBestScore;
+        m_pDisplayedBestScore = nullptr;
+    }
+}
+
 void GameCore::removeSpriteByType(int spriteType) {
     auto children = m_pScene->items();
     for(auto child : children) {
@@ -909,8 +940,16 @@ void GameCore::restartGame() {
     removeSpriteByType(DECOR);
     removeSpriteByType(FIRE);
 
+    // Regarde si le score à afficher dans le meilleur score doit changer
+    if(m_currentWave > m_bestScore) {
+        m_bestScore = m_currentWave - 1;
+    }
+
     // remet le fond en noir
     m_pScene->setBackgroundColor(QColor(0, 0, 0));
+
+    // Supprime l'épée du joueur si elle est encore présente au moment du Game Over
+    m_pPlayer->removeSword();
 
     // Supprime le joueur
     delete m_pPlayer;
@@ -925,9 +964,6 @@ void GameCore::restartGame() {
     m_pPlayer->setScale(PLAYER_SCALE_FACTOR);
     m_pPlayer->setPos(m_pScene->width()/2.0, m_pScene->height()/2.0);
 
-    // Supprime l'épée du joueur si elle est encore présente au moment du Game Over
-    m_pPlayer->removeSword();
-
     // Réinitialise le mode de jeu à START
     m_gameMode = START;
 
@@ -938,17 +974,16 @@ void GameCore::restartGame() {
     clearWavesInformation();
 
     // Affiche les levels et le titre du jeu au joueur
-    displayLevelInformation("THE LEGEND OF ZELDA FIGHTER \n"
-                            "\n"
-                            "    1 - Field of Hyrule \n"
-                            "    2 - Riverside \n"
-                            "    3 - Death Mountain \n");
+    displayLevelInformation();
 
     // Affiche les items et leurs descriptions au joueur
     displayItemsInformation();
 
     // Affiche les ennemis et leurs descriptions au joueur
     displayEnnemyInformation();
+
+    // Affiche le meilleur score du joueur
+    displayBestScore();
 
     // Redémarre le tick arrêté au moment du Game Over
     m_pGameCanvas->startTick();

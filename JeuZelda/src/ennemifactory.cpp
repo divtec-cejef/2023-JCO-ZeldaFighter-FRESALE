@@ -10,9 +10,10 @@
 #include "ennemileeverrouge.h"
 #include "ennemioctopus.h"
 
-EnnemiFactory::EnnemiFactory(GameScene* scene)
+EnnemiFactory::EnnemiFactory(GameScene* scene, Player* player)
 {
     m_pScene = scene;
+    m_pPlayer = player;
 }
 
 void EnnemiFactory::createWave(int nbreEnnemiLeever, int nbreEnnemiLeeverRouge, int nbreEnnemiOctopus) {
@@ -23,8 +24,8 @@ void EnnemiFactory::createWave(int nbreEnnemiLeever, int nbreEnnemiLeeverRouge, 
         //Ajout de l'ennemi à la scène
         m_pScene->addSpriteToScene(ennemi);
         //Positionnement de l'ennemi aléatoirement
-        ennemi->setX(std::rand() % (m_pScene->width() - ennemi->width()));
-        ennemi->setY(std::rand() % (m_pScene->height() - ennemi->height() - 100) + 50);
+        ennemi->setX(QRandomGenerator::global()->bounded(m_pScene->width() - ennemi->width()));
+        ennemi->setY(QRandomGenerator::global()->bounded(m_pScene->height() - ennemi->height() - 100) + 50);
     }
 
     for(int i = 0; i < nbreEnnemiLeeverRouge; i++) {
@@ -33,8 +34,8 @@ void EnnemiFactory::createWave(int nbreEnnemiLeever, int nbreEnnemiLeeverRouge, 
         //Ajout de l'ennemi à la scène
         m_pScene->addSpriteToScene(ennemi);
         //Positionnement de l'ennemi aléatoirement
-        ennemi->setX(std::rand() % (m_pScene->width() - ennemi->width()));
-        ennemi->setY(std::rand() % (m_pScene->height() - ennemi->height() - 100) + 50);
+        ennemi->setX(QRandomGenerator::global()->bounded(m_pScene->width() - ennemi->width()));
+        ennemi->setY(QRandomGenerator::global()->bounded(m_pScene->height() - ennemi->height() - 100) + 50);
     }
 
     for(int i = 0; i < nbreEnnemiOctopus; i++) {
@@ -43,8 +44,8 @@ void EnnemiFactory::createWave(int nbreEnnemiLeever, int nbreEnnemiLeeverRouge, 
         //Ajout de l'ennemi à la scène
         m_pScene->addSpriteToScene(ennemi);
         //Positionnement de l'ennemi aléatoirement
-        ennemi->setX(std::rand() % (m_pScene->width() - ennemi->width()));
-        ennemi->setY(std::rand() % (m_pScene->height() - ennemi->height() - 100) + 50);
+        ennemi->setX(QRandomGenerator::global()->bounded(m_pScene->width() - ennemi->width()));
+        ennemi->setY(QRandomGenerator::global()->bounded(m_pScene->height() - ennemi->height() - 100) + 50);
     }
 }
 

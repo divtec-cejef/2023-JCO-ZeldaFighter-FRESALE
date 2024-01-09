@@ -11,7 +11,6 @@
 #include <QPointF>
 #include <QMovie>
 
-
 class GameCanvas;
 class GameScene;
 class Sprite;
@@ -70,14 +69,14 @@ public:
     void restorePlayerOpacity();
 
     int countEnnemies();
-    void playerPosition();
     void generateEnemyWave();
 
     void displayInformation(const QString& rMessage);
     void displayWaves(int waveNumber);
-    void displayLevelInformation(const QString& rMessage);
+    void displayLevelInformation();
     void displayItemsInformation();
     void displayEnnemyInformation();
+    void displayBestScore();
     void removeSpriteByType(int spriteType);
     void restartGame();
     void removeItemsByType(int spriteType);
@@ -86,6 +85,7 @@ public:
     void clearWavesInformation();
     void clearItemsInformation();
     void clearEnnemyInformation();
+    void clearBestScoreInformation();
 
     GameMode m_gameMode = RUNNING;
 
@@ -118,6 +118,7 @@ private:
     Sprite* m_pRock2 = nullptr;
     int m_playerSpeed = 10;
     int m_currentWave = 0;
+    int m_bestScore = 0;
     bool isLeftKeyPressed = false;
     bool isRightKeyPressed = false;
     bool isUpKeyPressed = false;
@@ -139,6 +140,7 @@ private:
     QGraphicsSimpleTextItem* m_pDisplayedtextLeever;
     QGraphicsSimpleTextItem* m_pDisplayedtextLeeverRouge;
     QGraphicsSimpleTextItem* m_pDisplayedtextOctopus;
+    QGraphicsSimpleTextItem* m_pDisplayedBestScore;
     Sprite* m_pHeart = nullptr;
     Sprite* m_pBlueRing = nullptr;
     Sprite* m_pTriforce = nullptr;

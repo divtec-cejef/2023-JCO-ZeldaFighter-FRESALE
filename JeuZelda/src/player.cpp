@@ -55,14 +55,15 @@ void Player::addHeart() {
     GameScene* parentScene = this->parentScene();
     heart->setScale(GameCore::DECOR_SCALE_FACTOR);
     heart->setData(GameCore::SpriteDataKey::SPRITE_TYPE_KEY, GameCore::HEART);
-    int hearthX = m_pHearts.length() * (hearthWidth + ESPACE_ENTRE_COEURS);
+    int hearthX = m_pHearts.length() * (hearthWidth + ESPACE_ENTRE_COEURS) - 50;
     parentScene->addSpriteToScene(heart, hearthX, 20);
 }
 
 void Player::attack(QPointF direction) {
-    if(m_pSword != nullptr)
+    if(m_pSword != nullptr) {
         return;
-    m_pSword = new Projectile(swordVitesse, direction, GameFramework::imagesPath() + "JeuZelda/ZeldaSpriteSword.png", this);
+    }
+    m_pSword = new Projectile(swordSpeed, direction, GameFramework::imagesPath() + "JeuZelda/ZeldaSpriteSword.png", this);
     m_pSword->setScale(SWORD_SCALE_FACTOR);
     m_pSword->setPos(scenePos());
     parentScene()->addSpriteToScene(m_pSword);
@@ -75,6 +76,7 @@ void Player::removeSword() {
 }
 
 void Player::blinkRed() {
+
 }
 
 Player::~Player() {

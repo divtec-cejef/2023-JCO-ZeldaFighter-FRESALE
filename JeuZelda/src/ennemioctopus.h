@@ -14,10 +14,13 @@ public:
     void attack(QPointF direction);
     void removeProjectile();
 
-    static constexpr int OCTOPUS_SCALE_FACTOR = 3.5;
-
 private:
     Projectile* m_pProjectil = nullptr;
+
+    static constexpr int OCTOPUS_SCALE_FACTOR = 3.5;
+    static constexpr int CHANCE_TO_SPAWN_HEART = 8;
+    static constexpr int CHANCE_TO_SPAWN_BLUE_RING = 16;
+    static constexpr int CHANCE_TO_SPAWN_TRIFORCE = 50;
 };
 
 #endif // ENNEMIOCTOPUS_H

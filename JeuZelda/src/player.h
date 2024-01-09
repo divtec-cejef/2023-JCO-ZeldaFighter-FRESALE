@@ -22,7 +22,7 @@ public:
     void updatePlayer();
     void blinkRed();
     bool isDead = false;
-    float swordVitesse = 550.0;
+    float swordSpeed = 550.0;
     Projectile* m_pSword = nullptr;
 
     int m_invincibleCooldown = 0;

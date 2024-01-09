@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
 
     if (GameFramework::resourcesPath().isEmpty()) {
         qCritical() << "Dossier des ressources introuvable : Fin d'exécution du programme.";
-        return -1;
+            return -1;
     }
 
     MainFrm w;
