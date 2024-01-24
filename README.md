@@ -1,7 +1,7 @@
 # README - The Legend Of Zelda Fighter
 
 # Fonctionnement du jeu
-Le jeu est un jeu sous forme de vague d'ennemi qu'il va falloir éliminés pour passer à la vague suivante.
+Le jeu est un jeu sous forme de vague d'ennemi qu'il faudra vaincre pour passer à la vague suivante.
 Il y a de plus en plus d'ennemis à chaque nouvelle vague.
 
 Les ennemis peuvent faire apparaitre des objets après avoir été éliminés :
