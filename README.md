@@ -10,6 +10,9 @@ Les ennemis peuvent faire apparaitre des objets après avoir été éliminés :
 - Triforce : enlève 1 PV à tous les ennemis présent à l'écran
 
 Le joueur possède des coeurs afin de survivre, mais il peut en récupérer après avoir éliminés des monstres.
+
+Le joueur commence la partie avec 3 coeurs.
+
 Le joueur peux posséder 5 coeur au maximum.
 
 # Déplacement :
